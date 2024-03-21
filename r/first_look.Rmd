@@ -1,0 +1,47 @@
+---
+title: "First Look at Data"
+author: "Heidi Rodenhizer"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+# Load Libraries
+
+```{r}
+library(viridis)
+library(readxl)
+library(tidyverse)
+```
+
+# Load Data
+
+```{r}
+q1_3 = read_excel(
+  './data/Q1_3.xlsx', 
+  range = 'A7:K402',
+  col_names = colnames(
+    read_excel('./data/Q1_3.xlsx', n_max = 1)
+    )
+) |>
+  rename_with(~tolower(.)) |>
+  rename(median = `even chance`) |>
+  rename_with(~ str_split(.x, ' ', simplify = TRUE)[,3], .cols = matches('level'))
+```
+
+## Data Cleaning
+
+```{r}
+q1_3 = q1_3 |>
+  mutate(
+    across(.cols = c(lower, upper, median), ~ as.numeric(.x))
+    )
+```
+
+```{r}
+ggplot(q1_3, 
+       aes(x = lower,
+           color = scenario)) +
+  geom_density() +
+  facet_grid(question ~ category, scales = 'free')
+```
+
