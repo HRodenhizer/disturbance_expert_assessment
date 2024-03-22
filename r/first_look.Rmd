@@ -13,7 +13,14 @@ library(readxl)
 library(tidyverse)
 ```
 
+```{r}
+theme_set(theme_bw())
+```
+
+
 # Load Data
+
+## Q1/3
 
 ```{r}
 q1_3 = read_excel(
@@ -23,25 +30,387 @@ q1_3 = read_excel(
     read_excel('./data/Q1_3.xlsx', n_max = 1)
     )
 ) |>
-  rename_with(~tolower(.)) |>
-  rename(median = `even chance`) |>
-  rename_with(~ str_split(.x, ' ', simplify = TRUE)[,3], .cols = matches('level'))
-```
-
-## Data Cleaning
-
-```{r}
-q1_3 = q1_3 |>
+  rename_with(~str_to_title(.)) |>
+  rename_with(
+    ~ str_split(.x, ' ', simplify = TRUE)[,3], 
+    .cols = matches('level')
+  ) |>
   mutate(
-    across(.cols = c(lower, upper, median), ~ as.numeric(.x))
-    )
+    across(.cols = c(Upper, Lower, `Even Chance`), ~as.numeric(.x)),
+    Scenario = factor(
+      case_when(
+        Scenario == 'Present day' ~ 'Current',
+        Scenario == 'A' ~ '1.5 C',
+        Scenario == 'B' ~ '2 C',
+        Scenario == 'C' ~ 'RCP 8.5'
+      ),
+      levels = c(
+        'Current',
+        '1.5 C',
+        '2 C',
+        'RCP 8.5'
+      )
+    ),
+    Timescale = factor(
+      case_when(Timescale == '2020' ~ 'Current',
+                TRUE ~ as.character(Timescale)),
+      levels = c('Current',
+                 '2100',
+                 '2300')
+      ),
+    Upper = case_when(Upper > 2000 ~ NA,
+                      TRUE ~ Upper),
+    `Even Chance` = case_when(`Even Chance` > 2000 ~ NA,
+                      TRUE ~ `Even Chance`),
+    Lower = case_when(Lower > 2000 ~ NA,
+                      TRUE ~ Lower)
+  )
 ```
 
+Long Version
+
 ```{r}
+q1_3_long = q1_3 |>
+  pivot_longer(Lower:`Even Chance`, 
+               names_to = 'Estimate Type', 
+               values_to = 'Carbon Impact') |>
+  mutate(
+    `Estimate Type` = factor(
+      `Estimate Type`,
+      levels = c(
+        'Lower',
+        'Even Chance',
+        'Upper'
+      )
+    )
+  )
+```
+
+Summarized Version
+
+```{r}
+q1_3_summary = q1_3 |>
+  summarise(
+    across(
+      .cols = c(
+        Upper, Lower, `Even Chance`, Expertise, Confidence
+      ),
+      ~ mean(.x, na.rm = TRUE),
+      .names = '{.col} Mean'
+    ),
+    across(
+      .cols = c(
+        Upper, Lower, `Even Chance`, Expertise, Confidence
+      ),
+      ~ median(.x, na.rm = TRUE),
+      .names = '{.col} Median'
+    ),
+    across(
+      .cols = c(
+        Upper, Lower, `Even Chance`, Expertise, Confidence
+      ),
+      ~ sd(.x, na.rm = TRUE),
+      .names = '{.col} SD'
+    ),
+    across(
+      .cols = c(
+        Upper, Lower, `Even Chance`, Expertise, Confidence
+      ),
+      ~ sd(.x, na.rm = TRUE)/n(),
+      .names = '{.col} SE'
+    ),
+    .by = c(Question, Category, Scenario, Timescale)
+  )
+```
+
+## Q2
+
+```{r}
+q2 = read_excel('./data/Q2.xlsx', 
+  range = 'A7:L363',
+  col_names = colnames(
+    read_excel('./data/Q2.xlsx', range = 'A1:L1')
+    )
+) |>
+  rename_with(~str_to_title(.)) |>
+  rename_with(
+    ~ str_split(.x, ' ', simplify = TRUE)[,3], 
+    .cols = matches('level')
+  ) |>
+  mutate(
+    across(
+      .cols = c(Frequency, Extent, Range, Severity),
+      ~ case_when(.x == '-' ~ '0',
+                  TRUE ~ .x) |>
+        as.numeric()
+    ),
+    across(
+      .cols = c(Expertise, Confidence),
+      ~ as.numeric(.x)
+      ),
+    Scenario = factor(
+      case_when(
+        Scenario == 'A' ~ '1.5 C',
+        Scenario == 'B' ~ '2 C',
+        Scenario == 'C' ~ 'RCP 8.5',
+        Scenario == 'c' ~ 'RCP 8.5'
+      ),
+      levels = c(
+        '1.5 C',
+        '2 C',
+        'RCP 8.5'
+      )
+    ),
+    Timescale = factor(
+      case_when(Timescale == '2020' ~ 'Current',
+                TRUE ~ as.character(Timescale)),
+      levels = c('Current',
+                 '2100',
+                 '2300')
+      )
+  ) |>
+  pivot_longer(Frequency:Severity, 
+               names_to = 'Variable', 
+               values_to = 'Disturbance Change')
+```
+
+## Q4
+
+```{r}
+q4 = read_excel('./data/Q4_figure.xlsx', 
+  range = 'A7:G317',
+  col_names = colnames(
+    read_excel('./data/Q4_figure.xlsx', range = 'A1:G1')
+    )
+) |>
+  rename(Subquestion = `Sub-question (i-iv)`)  |>
+  mutate(
+    Aspect = case_when(
+      Subquestion == 'i' ~ 'Spatial Variability',
+      Subquestion == 'ii' ~ 'Temporal Variability',
+      Subquestion == 'iii' ~ 'Direct Effects',
+      Subquestion == 'iv' ~ 'Indirect Effects'
+    ),
+    across(.cols = c(Availability, Consensus),
+           ~ (.x - 0.5)*2)
+  )
+```
+
+
+# Figures
+
+```{r}
+scenario_colors = c('gray30','#FFCC00', '#FF6600', '#990000')
+```
+
+## Q1/Q3
+
+### Histograms
+
+```{r}
+# lower
 ggplot(q1_3, 
-       aes(x = lower,
-           color = scenario)) +
+       aes(x = Lower,
+           color = Scenario)) +
   geom_density() +
-  facet_grid(question ~ category, scales = 'free')
+  scale_color_manual(name = 'Emissions\nPathway',
+                     values = scenario_colors) +
+  facet_grid(Question ~ Category, scales = 'free') +
+  ggtitle('Lower')
+
+# upper
+ggplot(q1_3, 
+       aes(x = Upper,
+           color = Scenario)) +
+  geom_density() +
+  scale_color_manual(name = 'Emissions\nPathway',
+                     values = scenario_colors) +
+  facet_grid(Timescale ~ Category, scales = 'free') +
+  ggtitle('Upper')
+
+# even chance
+ggplot(q1_3, 
+       aes(x = `Even Chance`,
+           color = Scenario)) +
+  geom_density() +
+  scale_color_manual(name = 'Emissions\nPathway',
+                     values = scenario_colors) +
+  facet_grid(Timescale ~ Category, scales = 'free') +
+  ggtitle('Even Chance')
+```
+
+### Summarized Values
+Even chance values which fall outside of lower-upper range, could be due to some people not filling in all boxes?
+
+```{r}
+# Mean values across respondents
+ggplot(q1_3_summary, 
+       aes(x = Timescale,
+           color = Scenario)) +
+  geom_hline(yintercept = 0,
+             color = 'gray30') +
+  geom_point(aes(y = `Lower Mean`),
+             position = position_dodge(width = 0.75),
+             size = 2,
+             alpha = 0.5) +
+  geom_errorbar(aes(ymin = `Lower Mean` - `Lower SD`,
+                    ymax = `Lower Mean` + `Lower SD`),
+             position = position_dodge(width = 0.75),
+             width = 0.25,
+             alpha = 0.5) +
+  geom_point(aes(y = `Even Chance Mean`),
+             position = position_dodge(width = 0.75),
+             size = 3) +
+  geom_errorbar(aes(ymin = `Even Chance Mean` - `Even Chance SD`,
+                    ymax = `Even Chance Mean` + `Even Chance SD`),
+             position = position_dodge(width = 0.75),
+             width = 0.5) +
+  geom_point(aes(y = `Upper Mean`),
+             position = position_dodge(width = 0.75),
+             size = 2,
+             alpha = 0.5) +
+  geom_errorbar(aes(ymin = `Upper Mean` - `Upper SD`,
+                    ymax = `Upper Mean` + `Upper SD`),
+             position = position_dodge(width = 0.75),
+             width = 0.25,
+             alpha = 0.5) +
+  # scale_color_viridis(name = 'Emissions\nPathway',
+  #                     begin = 0.1,
+  #                     end = 0.9,
+  #                     discrete = TRUE,
+  #                     option = 'inferno',
+  #                     direction = -1) +
+  scale_y_continuous(name = expression('Tg C yr'^-1)) +
+  scale_color_manual(name = 'Emissions\nPathway',
+                     values = scenario_colors) +
+  facet_grid(Category ~ ., scales = 'free_y') +
+  theme(axis.title.x = element_blank()) +
+  ggtitle('Mean Even Chance (bold), Lower, and Upper (lighter) Carbon Impact Across Respondents (Errorbars are Std Dev)')
+
+# Median values across respondents
+ggplot(q1_3_summary, 
+       aes(x = Timescale,
+           color = Scenario)) +
+  geom_hline(yintercept = 0,
+             color = 'gray30') +
+  geom_point(aes(y = `Lower Median`),
+             position = position_dodge(width = 0.75),
+             size = 2,
+             alpha = 0.5) +
+  geom_errorbar(aes(ymin = `Lower Median` - `Lower SD`,
+                    ymax = `Lower Median` + `Lower SD`),
+             position = position_dodge(width = 0.75),
+             width = 0.25,
+             alpha = 0.5) +
+  geom_point(aes(y = `Even Chance Median`),
+             position = position_dodge(width = 0.75),
+             size = 3) +
+  geom_errorbar(aes(ymin = `Even Chance Median` - `Even Chance SD`,
+                    ymax = `Even Chance Median` + `Even Chance SD`),
+             position = position_dodge(width = 0.75),
+             width = 0.5) +
+  geom_point(aes(y = `Upper Median`),
+             position = position_dodge(width = 0.75),
+             size = 2,
+             alpha = 0.5) +
+  geom_errorbar(aes(ymin = `Upper Median` - `Upper SD`,
+                    ymax = `Upper Median` + `Upper SD`),
+             position = position_dodge(width = 0.75),
+             width = 0.25,
+             alpha = 0.5) +
+  # scale_color_viridis(name = 'Emissions\nPathway',
+  #                     begin = 0.1,
+  #                     end = 0.9,
+  #                     discrete = TRUE,
+  #                     option = 'inferno',
+  #                     direction = -1) +
+  scale_y_continuous(name = expression('Tg C yr'^-1)) +
+  scale_color_manual(name = 'Emissions\nPathway',
+                     values = scenario_colors) +
+  facet_grid(Category ~ ., scales = 'free_y') +
+  theme(axis.title.x = element_blank()) +
+  ggtitle('Median Even Chance (bold), Lower, and Upper (lighter) Carbon Impact Across Respondents (Errorbars are Std Dev)')
+```
+
+```{r, fig.height = 6.5, fig.width = 6.5}
+# all 3 in one plot, but with boxplots
+ggplot(q1_3_long, 
+       aes(x = Timescale,
+           fill = Scenario)) +
+  geom_hline(yintercept = 0,
+             color = 'gray30') +
+  geom_boxplot(aes(y = `Carbon Impact`),
+               color = 'black',
+               linewidth = 0.25,
+               outlier.size = 0.5) +
+  # scale_color_viridis(name = 'Emissions\nPathway',
+  #                     begin = 0.1,
+  #                     end = 0.9,
+  #                     discrete = TRUE,
+  #                     option = 'inferno',
+  #                     direction = -1) +
+  scale_y_continuous(name = expression('Tg C yr'^-1)) +
+  scale_fill_manual(name = 'Emissions\nPathway',
+                     values = scenario_colors) +
+  facet_grid(Category ~ `Estimate Type`, scales = 'free_y') +
+  theme(axis.title.x = element_blank())
+
+# ggsave('./figures/q1_3_overview.pdf',
+#        height = 6.5,
+#        width = 6.5)
+# ggsave('./figures/q1_3_overview.jpg',
+#        height = 6.5,
+#        width = 6.5)
+```
+
+## Q2
+
+```{r, fig.height = 6.5, fig.width = 6.5}
+ggplot(q2, 
+       aes(x = Timescale, 
+           y = `Disturbance Change`, 
+           fill = Scenario)) +
+  geom_hline(yintercept = 0,
+             color = 'gray30') +
+  geom_boxplot(position = position_dodge(width = 0.75),
+               color = 'black',
+               linewidth = 0.25,
+               outlier.size = 0.5) +
+  scale_fill_manual(name = 'Emissions\nPathway',
+                     values = scenario_colors[-1]) +
+  facet_grid(Category ~ Variable)
+  
+# ggsave('./figures/q2_overview.pdf',
+#        height = 6.5,
+#        width = 6.5)
+# ggsave('./figures/q2_overview.jpg',
+#        height = 6.5,
+#        width = 6.5)
+```
+
+## Q4
+
+```{r, fig.height = 9, fig.width = 6.5}
+ggplot(q4, aes(x = Availability, y = Consensus, color = Aspect)) +
+  geom_hline(yintercept = 0,
+             color = 'gray30') +
+  geom_vline(xintercept = 0,
+             color = 'gray30') +
+  geom_point() +
+  scale_x_continuous(limits = c(-1, 1)) +
+  scale_y_continuous(limits = c(-1, 1)) +
+  scale_color_viridis(discrete = TRUE) +
+  facet_wrap(~ Category, ncol = 2) +
+  coord_fixed(expand = FALSE) +
+  theme(legend.position = 'inside',
+        legend.position.inside = c(0.75, 0.09),
+        legend.justification = c(0.5, 0))
+
+# ggsave('./figures/q4_compiled.pdf',
+#        height = 9,
+#        width = 6.5)
+# ggsave('./figures/q4_compiled.jpg',
+#        height = 9,
+#        width = 6.5)
 ```
 
