@@ -36,7 +36,9 @@ q1_3 = read_excel(
     .cols = matches('level')
   ) |>
   mutate(
-    across(.cols = c(Upper, Lower, `Even Chance`), ~as.numeric(.x)),
+    across(.cols = c(Upper, Lower, `Even Chance`), 
+           ~ case_when(.x == '-' ~ 0,
+                       TRUE ~ as.numeric(.x))),
     Scenario = factor(
       case_when(
         Scenario == 'Present day' ~ 'Current',
@@ -57,14 +59,84 @@ q1_3 = read_excel(
       levels = c('Current',
                  '2100',
                  '2300')
-      ),
-    Upper = case_when(Upper > 2000 ~ NA,
-                      TRUE ~ Upper),
-    `Even Chance` = case_when(`Even Chance` > 2000 ~ NA,
-                      TRUE ~ `Even Chance`),
-    Lower = case_when(Lower > 2000 ~ NA,
-                      TRUE ~ Lower)
-  )
+      )#,
+    # Upper = case_when(Upper > 2000 ~ NA,
+    #                   TRUE ~ Upper),
+    # `Even Chance` = case_when(`Even Chance` > 2000 ~ NA,
+    #                   TRUE ~ `Even Chance`),
+    # Lower = case_when(Lower > 2000 ~ NA,
+    #                   TRUE ~ Lower)
+  ) |>
+  filter(
+    !(Respondent == 12 & Category == 'Biotic' & Question == 1) | # values given as percentages
+      !(Respondent == 18 & Category == 'Permafrost' & Question == 1) # lower and upper seemed mixed up, units may not have been Tg, and additional comments said numbers were limited to peatland C stocks
+    )
+
+# It looks like a few respondents put even chance first, then high, then low
+swapped_even_low_values = q1_3 |>
+  filter(Respondent == 15 & Category == 'Permafrost' |
+           Respondent == 9 & Category == 'Weather' |
+           Respondent == 10 & Category == 'Anthropogenic') |>
+  rename(`Even Chance` = Lower, Lower = `Even Chance`)
+
+q1_3 = q1_3 |>
+  rows_update(
+    swapped_even_low_values, 
+    by = colnames(swapped_even_low_values)[
+      which(
+        !colnames(swapped_even_low_values) %in% c('Even Chance', 'Upper', 'Lower')
+        )
+      ]
+    )
+
+# It looks like upper and lower got mixed up with negative values for one respondent
+swapped_low_high_values = q1_3 |>
+  filter(Respondent == 2 & Category == 'Fire' & Question == '3a') |>
+  rename(Upper = Lower, Lower = Upper)
+
+q1_3 = q1_3 |>
+  rows_update(
+    swapped_low_high_values, 
+    by = colnames(swapped_low_high_values)[
+      which(
+        !colnames(swapped_low_high_values) %in% c('Even Chance', 'Upper', 'Lower')
+                                                 )
+                                           ]
+    )
+
+# one respondent had unreasonably high values for question 1 - may have been total release rather than change between historical and present day?
+unreasonable_values = q1_3 |>
+  filter(Respondent == 2 & Category == 'Anthropogenic' & Question == '1.0') |>
+  mutate(Upper = NA, 
+         Lower = NA, 
+         `Even Chance` = NA)
+
+q1_3 = q1_3 |>
+  rows_update(
+    unreasonable_values, 
+    by = colnames(unreasonable_values)[
+      which(
+        !colnames(unreasonable_values) %in% c('Even Chance', 'Upper', 'Lower')
+                                                 )
+                                           ]
+    )
+```
+
+```{r}
+# Percent of respondents with missing values or error
+q1_3 |>
+  summarise(errors = case_when(any(!is.na(Flags)) ~ 1,
+                               TRUE ~ 0),
+            .by = c(Respondent, Category)) |>
+  summarise(error_rate = sum(errors)/n())
+
+# Percent of rows with missing values or error
+q1_3 |>
+  mutate(errors = case_when(!is.na(Flags) ~ 1,
+                            TRUE ~ 0)) |>
+  summarise(error_rate = sum(errors)/n())
+
+
 ```
 
 Long Version
@@ -378,6 +450,15 @@ ggplot(q2,
                outlier.size = 0.5) +
   scale_fill_manual(name = 'Emissions\nPathway',
                      values = scenario_colors[-1]) +
+  scale_y_continuous(name = 'Change in Disturbance (%)',
+                     breaks = seq(-3, 3),
+                     labels = c('<= -50',
+                                '-20 - -50',
+                                '-5 - -20',
+                                '-5 - 5',
+                                '5 - 20',
+                                '20 - 50',
+                                '>= 50')) +
   facet_grid(Category ~ Variable)
   
 # ggsave('./figures/q2_overview.pdf',
