@@ -277,6 +277,45 @@ scenario_colors = c('gray30','#FFCC00', '#FF6600', '#990000')
 
 ## Q1/Q3
 
+## Violin Plot
+
+```{r}
+# Median values across respondents
+ggplot(q1_3, 
+       aes(x = Timescale,
+           y = `Even Chance`,
+           color = Scenario)) +
+  geom_hline(yintercept = 0,
+             color = 'gray30') +
+  geom_point(aes(y = `Even Chance`),
+             position = position_jitterdodge(dodge.width = 0.75,
+                                             seed = 1),
+             size = 1,
+             alpha = 0.5) +
+  geom_errorbar(aes(ymin = Lower,
+                    ymax = Upper),
+             position = position_jitterdodge(dodge.width = 0.75,
+                                             seed = 1),
+             width = 0,
+             alpha = 0.5) +
+  geom_violin(fill = 'transparent',
+              position = position_dodge(width = 0.75)) +
+  # scale_color_viridis(name = 'Emissions\nPathway',
+  #                     begin = 0.1,
+  #                     end = 0.9,
+  #                     discrete = TRUE,
+  #                     option = 'inferno',
+  #                     direction = -1) +
+  scale_y_continuous(name = expression('Tg C yr'^-1)) +
+  scale_color_manual(name = 'Emissions\nPathway',
+                     values = scenario_colors) +
+  facet_grid(Category ~ ., scales = 'free_y') +
+  theme(axis.title.x = element_blank()) +
+  ggtitle('Median Even Chance (bold), Lower, and Upper (lighter) Carbon Impact Across Respondents (Errorbars are Std Dev)')
+
+```
+
+
 ### Histograms
 
 ```{r}
