@@ -119,7 +119,9 @@ q1_3 = q1_3 |>
         !colnames(unreasonable_values) %in% c('Even Chance', 'Upper', 'Lower')
                                                  )
                                            ]
-    )
+    ) |>
+  mutate(`Whole Question` = as.numeric(str_sub(Question, 1, 1)),
+         .after = Respondent)
 ```
 
 ```{r}
@@ -191,9 +193,17 @@ q1_3_summary = q1_3 |>
       ~ sd(.x, na.rm = TRUE)/n(),
       .names = '{.col} SE'
     ),
-    .by = c(Question, Category, Scenario, Timescale)
+    .by = c(Question, `Whole Question`, Category, Scenario, Timescale)
+  ) |>
+  mutate(
+    `Dodged Timescale` = case_when(
+      Scenario %in%  c('Current', '2 C') ~ as.numeric(Timescale),
+      Scenario == '1.5 C' ~ as.numeric(Timescale) - 0.3,
+      Scenario == 'RCP 8.5' ~ as.numeric(Timescale) + 0.3
+    )
   )
 ```
+
 
 ## Q2
 
@@ -241,10 +251,63 @@ q2 = read_excel('./data/Q2.xlsx',
                  '2300')
       )
   ) |>
+  mutate(`Whole Question` = as.numeric(str_sub(Question, 1, 1)),
+         .after = Respondent)
+```
+
+Long Version
+```{r}
+q2_long = q2 |>
   pivot_longer(Frequency:Severity, 
                names_to = 'Variable', 
                values_to = 'Disturbance Change')
 ```
+
+Summarized Version
+
+```{r}
+q2_summary = q2 |>
+  mutate(`Whole Question` = as.numeric(str_sub(Question, 1, 1))) |>
+  summarise(
+    across(
+      .cols = c(
+        Frequency, Extent, Range, Severity, Expertise, Confidence
+      ),
+      ~ mean(.x, na.rm = TRUE),
+      .names = '{.col} Mean'
+    ),
+    across(
+      .cols = c(
+        Frequency, Extent, Range, Severity, Expertise, Confidence
+      ),
+      ~ median(.x, na.rm = TRUE),
+      .names = '{.col} Median'
+    ),
+    across(
+      .cols = c(
+        Frequency, Extent, Range, Severity, Expertise, Confidence
+      ),
+      ~ sd(.x, na.rm = TRUE),
+      .names = '{.col} SD'
+    ),
+    across(
+      .cols = c(
+        Frequency, Extent, Range, Severity, Expertise, Confidence
+      ),
+      ~ sd(.x, na.rm = TRUE)/n(),
+      .names = '{.col} SE'
+    ),
+    .by = c(Question, `Whole Question`, Category, Scenario, Timescale)
+  ) |>
+  mutate(
+    `Dodged Timescale` = case_when(
+      Scenario %in%  c('Current', '2 C') ~ as.numeric(Timescale),
+      Scenario == '1.5 C' ~ as.numeric(Timescale) - 0.3,
+      Scenario == 'RCP 8.5' ~ as.numeric(Timescale) + 0.3
+    )
+  )
+```
+
 
 ## Q4
 
@@ -268,6 +331,91 @@ q4 = read_excel('./data/Q4_figure.xlsx',
   )
 ```
 
+## Completion Rates
+
+```{r}
+frame = expand_grid(Category = c('Anthropogenic',
+                                 'Biotic',
+                                 'Fire',
+                                 'Permafrost',
+                                 'Weather'),
+                    `Whole Question` = c(1, 4),
+                     Timescale = 'Current',
+                     Completion = c('Missing', 'Partial', 'Complete')) |>
+  rbind(
+    expand_grid(Category = c('Anthropogenic',
+                                 'Biotic',
+                                 'Fire',
+                                 'Permafrost',
+                                 'Weather'),
+                    `Whole Question` = c(2, 3),
+                     Timescale = c('2100', '2300'),
+                Completion = c('Missing', 'Partial', 'Complete'))
+  ) |>
+  mutate(
+    Timescale = factor(
+      Timescale,
+      levels = c('Current', '2100', '2300')
+    ),
+    Completion = factor(
+      Completion,
+      levels = c('Missing', 'Partial', 'Complete')
+    )
+  )
+
+
+respondents = q1_3 |>
+  mutate(`Whole Question` = as.numeric(str_sub(Question, 1, 1))) |>
+  summarise(
+    Completion = factor(
+      case_when(
+        all(!is.na(Lower)) & all(!is.na(Upper)) & all(!is.na(`Even Chance`)) ~ 'Complete',
+        any(!is.na(Lower)) | any(!is.na(Upper)) | any(!is.na(`Even Chance`)) ~ 'Partial',
+        all(is.na(Lower)) & all(is.na(Upper)) & all(is.na(`Even Chance`)) ~ 'Missing'
+      ),
+      levels = c('Missing', 'Partial', 'Complete')
+    ),
+    .by = c(Respondent, Category, `Whole Question`, Timescale)
+  ) |>
+  rbind(
+    q2_long |>
+      mutate(`Whole Question` = as.numeric(str_sub(Question, 1, 1))) |>
+      summarise(
+        Completion = factor(
+          case_when(
+            all(!is.na(`Disturbance Change`)) ~ 'Complete',
+            any(!is.na(`Disturbance Change`)) ~ 'Partial',
+            all(is.na(`Disturbance Change`)) ~ 'Missing'
+          ),
+          levels = c('Missing', 'Partial', 'Complete')
+        ),
+        .by = c(Respondent, Category, `Whole Question`, Timescale)
+      )
+  ) |>
+  rbind(
+    q4 |>
+      mutate(`Whole Question` = as.numeric(str_sub(Question, 1, 1))) |>
+      summarise(
+        Completion = factor(
+          case_when(
+            all(!is.na(Consensus)) & all(!is.na(Availability)) ~ 'Complete',
+            any(!is.na(Consensus)) | any(!is.na(Availability)) ~ 'Partial',
+            all(is.na(Consensus)) & all(is.na(Availability)) ~ 'Missing'
+          ),
+          levels = c('Missing', 'Partial', 'Complete')
+        ),
+        .by = c(Respondent, Category, `Whole Question`)
+      ) |>
+      mutate(Timescale = 'Current',
+             .before = Completion)
+  ) |>
+  summarise(Count = n(),
+            .by = c(Category, `Whole Question`, Timescale, Completion)) |>
+  full_join(frame, by = c('Category', 'Whole Question', 'Timescale', 'Completion')) |>
+  mutate(Count = case_when(is.na(Count) ~ 0,
+                           TRUE ~ Count))
+```
+
 
 # Figures
 
@@ -275,44 +423,189 @@ q4 = read_excel('./data/Q4_figure.xlsx',
 scenario_colors = c('gray30','#FFCC00', '#FF6600', '#990000')
 ```
 
-## Q1/Q3
 
-## Violin Plot
+## Number of Respondents
+
+```{r, fig.height = 6.5, fig.width = 6.5}
+ggplot(respondents,
+       aes(x = Timescale, 
+           y = Count, 
+           color = Completion, 
+           fill = Completion)) +
+  geom_bar(width = 0.46, position = position_dodge(width = 0.5),
+           stat = 'identity') +
+  scale_color_viridis(discrete = TRUE,
+                     direction = -1) +
+  scale_fill_viridis(discrete = TRUE,
+                     direction = -1) +
+  scale_x_discrete(name = 'Question') +
+  scale_y_continuous(name = 'Number of Respondents') +
+  facet_grid(Category ~ `Whole Question`, scales = 'free_x') +
+  theme(legend.position = 'bottom')
+
+# ggsave('./figures/respondent_count.pdf',
+#        height = 6.5, width = 6.5)
+# ggsave('./figures/respondent_count.jpg',
+#        height = 6.5, width = 6.5)
+```
+
+
+## Expertise
 
 ```{r}
+expertise = rbind(
+    q1_3 |>
+      select(Respondent,
+             Question,
+             `Whole Question`, 
+             Category, 
+             Timescale, 
+             Expertise),
+    q2 |>
+      select(Respondent,
+             Question,
+             `Whole Question`, 
+             Category, 
+             Timescale, 
+             Expertise)
+) |>
+  distinct()
+
+expertise_summary = expertise |>
+  summarise(`Expertise Mean` = mean(Expertise, na.rm = TRUE),
+            `Expertise Median` = median(Expertise, na.rm = TRUE),
+            .by = c(Question, `Whole Question`, Category, Timescale))
+```
+
+```{r, fig.height = 6.5, fig.width = 6.5}
+ggplot(expertise,
+       aes(x = Expertise,
+           fill = Timescale)
+) +
+  geom_bar(
+    position = position_dodge(width = 0.75)
+  ) +
+  geom_vline(data = expertise_summary,
+             aes(xintercept = `Expertise Mean`,
+                 linetype = 'Mean')) +
+  geom_vline(data = expertise_summary,
+             aes(xintercept = `Expertise Median`,
+                 linetype = 'Median')) +
+  scale_fill_viridis(discrete = TRUE) +
+  scale_linetype_manual(values = c('solid', 'dashed'),
+                        guide = guide_legend(title = element_blank())) +
+  scale_y_continuous(name = 'Number of Respondents',
+                     breaks = seq(0, 12, by = 2)) +
+  facet_grid(Category ~ Question, scales = 'free_x')
+
+# ggsave('./figures/expertise.pdf',
+#        height = 6.5,
+#        width = 6.5)
+# ggsave('./figures/expertise.jpg',
+#        height = 6.5,
+#        width = 6.5)
+```
+
+
+## Q1/Q3
+
+### Violin Plot
+
+```{r, fig.height = 6.5, fig.width = 6.5}
 # Median values across respondents
 ggplot(q1_3, 
        aes(x = Timescale,
            y = `Even Chance`,
-           color = Scenario)) +
+           fill = Scenario)) +
   geom_hline(yintercept = 0,
              color = 'gray30') +
-  geom_point(aes(y = `Even Chance`),
-             position = position_jitterdodge(dodge.width = 0.75,
+  geom_point(aes(y = `Even Chance`,
+                 color = Scenario),
+             position = position_jitterdodge(dodge.width = 0.9,
+                                             jitter.width = 0.7,
                                              seed = 1),
              size = 1,
              alpha = 0.5) +
-  geom_errorbar(aes(ymin = Lower,
-                    ymax = Upper),
-             position = position_jitterdodge(dodge.width = 0.75,
+  geom_segment(aes(y = Lower,
+                   yend = Upper,
+                   color = Scenario),
+             position = position_jitterdodge(dodge.width = 0.9,
+                                             jitter.width = 0.7,
                                              seed = 1),
              width = 0,
              alpha = 0.5) +
-  geom_violin(fill = 'transparent',
-              position = position_dodge(width = 0.75)) +
+  geom_violin(color = 'gray10',
+              alpha = 0.25,
+              position = position_dodge(width = 0.9)) +
   # scale_color_viridis(name = 'Emissions\nPathway',
   #                     begin = 0.1,
   #                     end = 0.9,
   #                     discrete = TRUE,
   #                     option = 'inferno',
   #                     direction = -1) +
-  scale_y_continuous(name = expression('Tg C yr'^-1)) +
-  scale_color_manual(name = 'Emissions\nPathway',
-                     values = scenario_colors) +
-  facet_grid(Category ~ ., scales = 'free_y') +
-  theme(axis.title.x = element_blank()) +
-  ggtitle('Median Even Chance (bold), Lower, and Upper (lighter) Carbon Impact Across Respondents (Errorbars are Std Dev)')
+  scale_color_manual(name = 'Emissions Pathway',
+                     values = scenario_colors,
+                     guide = guide_legend(ncol = 2)) +
+  scale_fill_manual(name = 'Emissions Pathway',
+                     values = scenario_colors,
+                     guide = guide_legend(ncol = 2)) +
+  geom_linerange(data = q1_3_summary,
+                 aes(xmin = `Dodged Timescale` - 0.1, 
+                     xmax = `Dodged Timescale` + 0.1,
+                     y = `Even Chance Median`,
+                     linewidth = 'Even Chance'),
+                 color = 'black') +
+  geom_linerange(data = q1_3_summary,
+                 aes(xmin = `Dodged Timescale` - 0.075, 
+                     xmax = `Dodged Timescale` + 0.075,
+                     y = `Lower Median`,
+                     linewidth = 'Lower/Upper'),
+                 color = 'black') +
+  geom_linerange(data = q1_3_summary,
+                 aes(xmin = `Dodged Timescale` - 0.075, 
+                     xmax = `Dodged Timescale` + 0.075,
+                     y = `Upper Median`,
+                     linewidth = 'Lower/Upper'),
+                 color = 'black') +
+  scale_linewidth_manual(
+    name = 'Median Values',
+    values = c(0.7, 0.3),
+    # guide = guide_legend(
+    #   theme = theme(legend.title = element_blank())
+    # )
+  ) +
+  scale_y_continuous(name = expression('Tg C yr'^-1),
+                     transform = "asinh",
+                     breaks = c(-1000, -100, -10, -1, 0, 1, 10, 100, 1000, 10000),
+                     minor_breaks = c(
+                       seq(-4000, -1000, by = 1000),
+                       seq(-900, -100, by = 100),
+                       seq(-90, -10, by = 10),
+                       seq(-9, -1, by = 1),
+                       seq(-0.9, -0.1, by = 0.1),
+                       seq(0.1, 0.9, by = 0.1),
+                       seq(1, 9, by = 1),
+                       seq(10, 90, by = 10),
+                       seq(100, 900, by = 100),
+                       seq(1000, 9000, by = 1000),
+                       seq(10000, 50000, by = 10000)
+                     ),
+                     # labels = function(x) format(x, scientific = TRUE),
+                     # minor_breaks = c(
+                     #   -500, -50, -5, -0.5, 0.5, 5, 50, 500, 5000
+                     #   ),
+                     guide = "axis_logticks") +
+  facet_wrap(~ Category, ncol = 2) +
+  theme(axis.title.x = element_blank(),
+        axis.text.x = element_text(angle = 45, hjust = 1),
+        legend.position = 'inside',
+        legend.position.inside = c(0.75, 0.13),
+        legend.justification = c(0.5, 0.5))
 
+# ggsave('./figures/q1_3_violin.pdf',
+#        height = 6.5, width = 6.5)
+# ggsave('./figures/q1_3_violin.jpg',
+#        height = 6.5, width = 6.5)
 ```
 
 
@@ -474,10 +767,109 @@ ggplot(q1_3_long,
 #        width = 6.5)
 ```
 
-## Q2
+### Q1 Confidence
+
+```{r, fig.height = 6.5, fig.width = 4}
+ggplot(q1_3 |>
+         filter(Question == '1.0')
+) +
+  geom_bar(aes(x = Confidence),
+           position = position_dodge()) +
+  geom_vline(data = q1_3_summary |>
+               filter(Question == '1.0'),
+             aes(xintercept = `Confidence Mean`,
+                 linetype = 'Mean')) +
+  geom_vline(data = q1_3_summary |>
+               filter(Question == '1.0'),
+             aes(xintercept = `Confidence Median`,
+                 linetype = 'Median')) +
+  scale_linetype_manual(
+    values = c('solid', 'dashed'),
+    guide = guide_legend(title = element_blank())
+  ) +
+  scale_y_continuous(name = 'Number of Respondents',
+                     breaks = seq(0, 10, by = 2)) +
+  facet_grid(Category ~ .)
+
+# ggsave('./figures/q1_confidence.pdf',
+#        height = 6.5, 
+#        width = 4)
+# ggsave('./figures/q1_confidence.jpg',
+#        height = 6.5, 
+#        width = 4)
+```
+
+### Q3 Confidence
 
 ```{r, fig.height = 6.5, fig.width = 6.5}
-ggplot(q2, 
+ggplot(
+  q1_3 |>
+         filter(Question == '3a')
+) +
+  geom_bar(aes(x = Confidence),
+           position = position_dodge()) +
+  geom_vline(data = q1_3_summary |>
+               filter(Question == '3a'),
+             aes(xintercept = `Confidence Mean`,
+                 linetype = 'Mean')) +
+  geom_vline(data = q1_3_summary |>
+               filter(Question == '3a'),
+             aes(xintercept = `Confidence Median`,
+                 linetype = 'Median')) +
+  scale_linetype_manual(
+    values = c('solid', 'dashed'),
+    guide = guide_legend(title = element_blank())
+  ) +
+  scale_y_continuous(name = 'Number of Respondents',
+                     breaks = seq(0, 10, by = 2)) +
+  facet_grid(Category ~ Scenario)
+
+# ggsave('./figures/q3a_confidence.pdf',
+#        height = 6.5, 
+#        width = 6.5)
+# ggsave('./figures/q3a_confidence.jpg',
+#        height = 6.5, 
+#        width = 6.5)
+```
+
+```{r, fig.height = 6.5, fig.width = 6.5}
+ggplot(
+  q1_3 |>
+         filter(Question == '3b')
+) +
+  geom_bar(aes(x = Confidence),
+           position = position_dodge()) +
+  geom_vline(data = q1_3_summary |>
+               filter(Question == '3b'),
+             aes(xintercept = `Confidence Mean`,
+                 linetype = 'Mean')) +
+  geom_vline(data = q1_3_summary |>
+               filter(Question == '3b'),
+             aes(xintercept = `Confidence Median`,
+                 linetype = 'Median')) +
+  scale_linetype_manual(
+    values = c('solid', 'dashed'),
+    guide = guide_legend(title = element_blank())
+  ) +
+  scale_y_continuous(name = 'Number of Respondents',
+                     breaks = seq(0, 10, by = 2)) +
+  facet_grid(Category ~ Scenario)
+
+# ggsave('./figures/q3b_confidence.pdf',
+#        height = 6.5, 
+#        width = 6.5)
+# ggsave('./figures/q3b_confidence.jpg',
+#        height = 6.5, 
+#        width = 6.5)
+```
+
+
+## Q2
+
+### Box Plot
+
+```{r, fig.height = 6.5, fig.width = 6.5}
+ggplot(q2_long, 
        aes(x = Timescale, 
            y = `Disturbance Change`, 
            fill = Scenario)) +
@@ -517,14 +909,32 @@ ggplot(q4, aes(x = Availability, y = Consensus, color = Aspect)) +
   geom_vline(xintercept = 0,
              color = 'gray30') +
   geom_point() +
-  scale_x_continuous(limits = c(-1, 1)) +
-  scale_y_continuous(limits = c(-1, 1)) +
+  geom_text(data = tibble(
+    x = c(-0.5, 0.5, -0.5, 0.5),
+    y = c(0.95, 0.95, -0.95, -0.95),
+    label = c('Established but\nIncomplete', 
+              'Well Established', 
+              'Speculative', 
+              'Competing Explanations'),
+    vjust = c(1, 1, 0, 0)
+    ),
+    aes(x = x, y = y, label = label, vjust = vjust),
+    size = 2.5,
+    inherit.aes = FALSE
+            ) +
+  scale_x_continuous(limits = c(-1, 1),
+                     breaks = c(-1, 1),
+                     labels = c('Low', 'High')) +
+  scale_y_continuous(limits = c(-1, 1),
+                     breaks = c(-1, 1),
+                     labels = c('Low', 'High')) +
   scale_color_viridis(discrete = TRUE) +
   facet_wrap(~ Category, ncol = 2) +
   coord_fixed(expand = FALSE) +
   theme(legend.position = 'inside',
         legend.position.inside = c(0.75, 0.09),
-        legend.justification = c(0.5, 0))
+        legend.justification = c(0.5, 0),
+        axis.text.x = element_text(angle = 90, vjust = 0.5))
 
 # ggsave('./figures/q4_compiled.pdf',
 #        height = 9,
@@ -532,5 +942,54 @@ ggplot(q4, aes(x = Availability, y = Consensus, color = Aspect)) +
 # ggsave('./figures/q4_compiled.jpg',
 #        height = 9,
 #        width = 6.5)
+```
+
+# Code Graveyard
+
+```{r}
+exp_conf = rbind(
+    q1_3_summary |>
+      select(Question, 
+             `Whole Question`, 
+             Category, 
+             Scenario, 
+             Timescale, 
+             `Expertise Mean`, 
+             `Expertise Median`, 
+             `Expertise SD`, 
+             `Expertise SE`, 
+             `Confidence Mean`, 
+             `Confidence Median`,
+             `Confidence SD`, 
+             `Confidence SE`),
+    q2_summary |>
+      select(Question, 
+             `Whole Question`, 
+             Category, 
+             Scenario, 
+             Timescale, 
+             `Expertise Mean`, 
+             `Expertise Median`, 
+             `Expertise SD`, 
+             `Expertise SE`, 
+             `Confidence Mean`, 
+             `Confidence Median`,
+             `Confidence SD`, 
+             `Confidence SE`)
+) |>
+  pivot_longer(
+    c(`Expertise Mean`:`Confidence SE`),
+    names_to = c('Variable', 'Metric'),
+    names_sep = ' ',
+    values_to = 'Value'
+  ) |>
+  pivot_wider(names_from = 'Metric', 
+              values_from = 'Value') |>
+  pivot_longer(Mean:Median,
+               names_to = 'Metric',
+               values_to = 'Value') |>
+  mutate(Variable = factor(Variable,
+                           levels = c('Expertise', 'Confidence')))
+
 ```
 
