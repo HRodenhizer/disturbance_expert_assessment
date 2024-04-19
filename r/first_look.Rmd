@@ -24,21 +24,19 @@ theme_set(theme_bw())
 
 ```{r}
 q1_3 = read_excel(
-  './data/Q1_3.xlsx', 
-  range = 'A7:K402',
-  col_names = colnames(
-    read_excel('./data/Q1_3.xlsx', n_max = 1)
-    )
+  './data/Q1_3.xlsx'#, 
+  # range = 'A7:K402',
+  # col_names = colnames(
+  #   read_excel('./data/Q1_3.xlsx', n_max = 1)
+  #   )
 ) |>
+  filter(Respondent != 37) |>
   rename_with(~str_to_title(.)) |>
   rename_with(
     ~ str_split(.x, ' ', simplify = TRUE)[,3], 
     .cols = matches('level')
   ) |>
   mutate(
-    across(.cols = c(Upper, Lower, `Even Chance`), 
-           ~ case_when(.x == '-' ~ 0,
-                       TRUE ~ as.numeric(.x))),
     Scenario = factor(
       case_when(
         Scenario == 'Present day' ~ 'Current',
@@ -67,61 +65,64 @@ q1_3 = read_excel(
     # Lower = case_when(Lower > 2000 ~ NA,
     #                   TRUE ~ Lower)
   ) |>
-  filter(
-    !(Respondent == 12 & Category == 'Biotic' & Question == 1) | # values given as percentages
-      !(Respondent == 18 & Category == 'Permafrost' & Question == 1) # lower and upper seemed mixed up, units may not have been Tg, and additional comments said numbers were limited to peatland C stocks
-    )
-
-# It looks like a few respondents put even chance first, then high, then low
-swapped_even_low_values = q1_3 |>
-  filter(Respondent == 15 & Category == 'Permafrost' |
-           Respondent == 9 & Category == 'Weather' |
-           Respondent == 10 & Category == 'Anthropogenic') |>
-  rename(`Even Chance` = Lower, Lower = `Even Chance`)
-
-q1_3 = q1_3 |>
-  rows_update(
-    swapped_even_low_values, 
-    by = colnames(swapped_even_low_values)[
-      which(
-        !colnames(swapped_even_low_values) %in% c('Even Chance', 'Upper', 'Lower')
-        )
-      ]
-    )
-
-# It looks like upper and lower got mixed up with negative values for one respondent
-swapped_low_high_values = q1_3 |>
-  filter(Respondent == 2 & Category == 'Fire' & Question == '3a') |>
-  rename(Upper = Lower, Lower = Upper)
-
-q1_3 = q1_3 |>
-  rows_update(
-    swapped_low_high_values, 
-    by = colnames(swapped_low_high_values)[
-      which(
-        !colnames(swapped_low_high_values) %in% c('Even Chance', 'Upper', 'Lower')
-                                                 )
-                                           ]
-    )
-
-# one respondent had unreasonably high values for question 1 - may have been total release rather than change between historical and present day?
-unreasonable_values = q1_3 |>
-  filter(Respondent == 2 & Category == 'Anthropogenic' & Question == '1.0') |>
-  mutate(Upper = NA, 
-         Lower = NA, 
-         `Even Chance` = NA)
-
-q1_3 = q1_3 |>
-  rows_update(
-    unreasonable_values, 
-    by = colnames(unreasonable_values)[
-      which(
-        !colnames(unreasonable_values) %in% c('Even Chance', 'Upper', 'Lower')
-                                                 )
-                                           ]
+  rowwise() |>
+  # rearrange values that are out of order
+  mutate(
+    estimate = median(
+      c(as.numeric(Lower), 
+        as.numeric(`Even Chance`), 
+        as.numeric(Upper))
+      ),
+    lower = min(
+      c(as.numeric(Lower), 
+        as.numeric(`Even Chance`), 
+        as.numeric(Upper))
+      ),
+    upper = max(
+      c(as.numeric(Lower), 
+        as.numeric(`Even Chance`), 
+        as.numeric(Upper))
+      ),
+    .after = `Even Chance`
     ) |>
-  mutate(`Whole Question` = as.numeric(str_sub(Question, 1, 1)),
-         .after = Respondent)
+  ungroup() |>
+  mutate(
+    estimate = case_when(
+      is.na(Lower) | is.na(`Even Chance`) | is.na(Upper) ~ as.numeric(`Even Chance`),
+      TRUE ~ estimate
+        ),
+    lower = case_when(
+      is.na(Lower) | is.na(`Even Chance`) | is.na(Upper) ~ as.numeric(Lower),
+      TRUE ~ lower
+        ),
+    upper = case_when(
+      is.na(Lower) | is.na(`Even Chance`) | is.na(Upper) ~ as.numeric(Upper),
+      TRUE ~ upper
+        )
+    )
+
+#   filter(
+#     !(Respondent == 12 & Category == 'Biotic' & Question == 1) | # values given as percentages
+#       !(Respondent == 18 & Category == 'Permafrost' & Question == 1) # lower and upper seemed mixed up, units may not have been Tg, and additional comments said numbers were limited to peatland C stocks
+#     )
+# 
+# 
+# # one respondent had unreasonably high values for question 1 - may have been total release rather than change between historical and present day?
+# unreasonable_values = q1_3 |>
+#   filter(Respondent == 2 & Category == 'Anthropogenic' & Question == '1.0') |>
+#   mutate(Upper = NA, 
+#          Lower = NA, 
+#          `Even Chance` = NA)
+```
+
+```{r}
+all_notes = q1_3 |>
+  filter(!is.na(Flags)) |>
+  pull(Flags)
+all_notes
+
+filter_out = all_notes[str_detect(all_notes, 'O|only') | str_detect(all_notes, 'percentage')]
+filter_out
 ```
 
 ```{r}
@@ -943,53 +944,3 @@ ggplot(q4, aes(x = Availability, y = Consensus, color = Aspect)) +
 #        height = 9,
 #        width = 6.5)
 ```
-
-# Code Graveyard
-
-```{r}
-exp_conf = rbind(
-    q1_3_summary |>
-      select(Question, 
-             `Whole Question`, 
-             Category, 
-             Scenario, 
-             Timescale, 
-             `Expertise Mean`, 
-             `Expertise Median`, 
-             `Expertise SD`, 
-             `Expertise SE`, 
-             `Confidence Mean`, 
-             `Confidence Median`,
-             `Confidence SD`, 
-             `Confidence SE`),
-    q2_summary |>
-      select(Question, 
-             `Whole Question`, 
-             Category, 
-             Scenario, 
-             Timescale, 
-             `Expertise Mean`, 
-             `Expertise Median`, 
-             `Expertise SD`, 
-             `Expertise SE`, 
-             `Confidence Mean`, 
-             `Confidence Median`,
-             `Confidence SD`, 
-             `Confidence SE`)
-) |>
-  pivot_longer(
-    c(`Expertise Mean`:`Confidence SE`),
-    names_to = c('Variable', 'Metric'),
-    names_sep = ' ',
-    values_to = 'Value'
-  ) |>
-  pivot_wider(names_from = 'Metric', 
-              values_from = 'Value') |>
-  pivot_longer(Mean:Median,
-               names_to = 'Metric',
-               values_to = 'Value') |>
-  mutate(Variable = factor(Variable,
-                           levels = c('Expertise', 'Confidence')))
-
-```
-
