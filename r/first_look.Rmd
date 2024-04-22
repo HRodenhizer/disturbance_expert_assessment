@@ -11,6 +11,7 @@ output: html_document
 library(viridis)
 library(readxl)
 library(tidyverse)
+library(ggridges)
 ```
 
 ```{r}
@@ -19,6 +20,71 @@ theme_set(theme_bw())
 
 
 # Load Data
+
+```{r}
+question_frame = expand_grid(
+  Category = c('Anthropogenic',
+               'Biotic',
+               'Fire',
+               'Permafrost',
+               'Weather'),
+  `Whole Question` = c(1, 4),
+  Timescale = 'Current',
+  Scenario = 'Current'
+  ) |>
+  rbind(
+    expand_grid(
+      Category = c('Anthropogenic',
+                   'Biotic',
+                   'Fire',
+                   'Permafrost',
+                   'Weather'),
+      `Whole Question` = c(2, 3),
+      Timescale = c('2100', '2300'),
+      Scenario = c('1.5 C', '2 C', 'RCP 8.5')
+    )
+  ) |>
+  mutate(
+    Timescale = factor(
+      Timescale,
+      levels = c('Current', '2100', '2300')
+    ),
+    Scenario = factor(
+      Scenario,
+      levels = c('Current', '1.5 C', '2 C', 'RCP 8.5')
+    )
+  )
+
+participant_frame = question_frame |>
+  full_join(
+    tibble(
+      x = c(
+        paste('Anthropogenic', 1:10, sep = '_'),
+        paste('Biotic', 1:13, sep = '_'),
+        paste('Fire', c(1:20, 22), sep = '_'),
+        paste('Permafrost', 1:22, sep = '_'),
+        paste('Weather', 1:11, sep = '_')
+      )
+    ) |>
+      separate_wider_delim(cols = x, 
+                           names = c('Category', 'Respondent'),
+                           delim = '_') |>
+      mutate(Respondent = as.numeric(Respondent)),
+    by = c('Category')
+  ) |>
+  arrange(Category, Respondent, `Whole Question`, Timescale) |>
+  mutate(
+    Question = case_when(
+      `Whole Question` == 1 ~ '1.0',
+      `Whole Question` == 2 & Timescale == '2100' ~ '2a',
+      `Whole Question` == 2 & Timescale == '2300' ~ '2b',
+      `Whole Question` == 3 & Timescale == '2100' ~ '3a',
+      `Whole Question` == 3 & Timescale == '2300' ~ '3b',
+      `Whole Question` == 4 ~ '4a'
+    )
+    )
+```
+
 
 ## Q1/3
 
@@ -30,12 +96,13 @@ q1_3 = read_excel(
   #   read_excel('./data/Q1_3.xlsx', n_max = 1)
   #   )
 ) |>
-  filter(Respondent != 37) |>
-  rename_with(~str_to_title(.)) |>
+  filter(Respondent != 37 & `QA/QC Completed` == 'yes') |>
+  rename_with(~str_to_title(.), .cols = Respondent:Flags) |>
   rename_with(
-    ~ str_split(.x, ' ', simplify = TRUE)[,3], 
+    ~ str_split(., ' ', simplify = TRUE)[,3], 
     .cols = matches('level')
   ) |>
+  rename(`Lower Range` = Lower, `Upper Range` = Upper) |>
   mutate(
     Scenario = factor(
       case_when(
@@ -58,71 +125,88 @@ q1_3 = read_excel(
                  '2100',
                  '2300')
       )#,
-    # Upper = case_when(Upper > 2000 ~ NA,
-    #                   TRUE ~ Upper),
+    # `Upper Range` = case_when(`Upper Range` > 2000 ~ NA,
+    #                   TRUE ~ `Upper Range`),
     # `Even Chance` = case_when(`Even Chance` > 2000 ~ NA,
     #                   TRUE ~ `Even Chance`),
-    # Lower = case_when(Lower > 2000 ~ NA,
-    #                   TRUE ~ Lower)
+    # `Lower Range` = case_when(`Lower Range` > 2000 ~ NA,
+    #                   TRUE ~ `Lower Range`)
   ) |>
   rowwise() |>
   # rearrange values that are out of order
   mutate(
-    estimate = median(
-      c(as.numeric(Lower), 
+    Estimate = median(
+      c(as.numeric(`Lower Range`), 
         as.numeric(`Even Chance`), 
-        as.numeric(Upper))
+        as.numeric(`Upper Range`))
       ),
-    lower = min(
-      c(as.numeric(Lower), 
+    Lower = min(
+      c(as.numeric(`Lower Range`), 
         as.numeric(`Even Chance`), 
-        as.numeric(Upper))
+        as.numeric(`Upper Range`))
       ),
-    upper = max(
-      c(as.numeric(Lower), 
+    Upper = max(
+      c(as.numeric(`Lower Range`), 
         as.numeric(`Even Chance`), 
-        as.numeric(Upper))
+        as.numeric(`Upper Range`))
       ),
     .after = `Even Chance`
     ) |>
   ungroup() |>
   mutate(
-    estimate = case_when(
-      is.na(Lower) | is.na(`Even Chance`) | is.na(Upper) ~ as.numeric(`Even Chance`),
-      TRUE ~ estimate
+    Estimate = case_when(
+      is.na(`Lower Range`) | is.na(`Even Chance`) | is.na(`Upper Range`) ~ as.numeric(`Even Chance`),
+      TRUE ~ Estimate
         ),
-    lower = case_when(
-      is.na(Lower) | is.na(`Even Chance`) | is.na(Upper) ~ as.numeric(Lower),
-      TRUE ~ lower
+    Lower = case_when(
+      is.na(`Lower Range`) | is.na(`Even Chance`) | is.na(`Upper Range`) ~ as.numeric(`Lower Range`),
+      TRUE ~ Lower
         ),
-    upper = case_when(
-      is.na(Lower) | is.na(`Even Chance`) | is.na(Upper) ~ as.numeric(Upper),
-      TRUE ~ upper
-        )
+    Upper = case_when(
+      is.na(`Lower Range`) | is.na(`Even Chance`) | is.na(`Upper Range`) ~ as.numeric(`Upper Range`),
+      TRUE ~ Upper
+        ),
+    `Whole Question` = as.numeric(str_sub(Question, 1, 1)),
+    `Expertise Group` = factor(
+      case_when(Expertise <= 3 ~ '3 or Less',
+                Expertise >= 4 ~ '4 or More',
+                is.na(Expertise) ~ 'Not Provided'),
+      levels = c('Not Provided', '3 or Less', '4 or More')
     )
-
-#   filter(
-#     !(Respondent == 12 & Category == 'Biotic' & Question == 1) | # values given as percentages
-#       !(Respondent == 18 & Category == 'Permafrost' & Question == 1) # lower and upper seemed mixed up, units may not have been Tg, and additional comments said numbers were limited to peatland C stocks
-#     )
-# 
-# 
-# # one respondent had unreasonably high values for question 1 - may have been total release rather than change between historical and present day?
-# unreasonable_values = q1_3 |>
-#   filter(Respondent == 2 & Category == 'Anthropogenic' & Question == '1.0') |>
-#   mutate(Upper = NA, 
-#          Lower = NA, 
-#          `Even Chance` = NA)
+  ) |>
+  full_join(participant_frame |>
+              filter(`Whole Question` %in% c(1, 3)),
+            by = colnames(participant_frame)) |>
+  arrange(Category, Respondent, `Whole Question`, Timescale, Scenario)
 ```
 
 ```{r}
-all_notes = q1_3 |>
+q1_3_all_notes = q1_3 |>
   filter(!is.na(Flags)) |>
   pull(Flags)
-all_notes
+q1_3_all_notes
 
-filter_out = all_notes[str_detect(all_notes, 'O|only') | str_detect(all_notes, 'percentage')]
-filter_out
+q1_3_filter_out = unique(
+  q1_3_all_notes[
+    str_detect(
+      q1_3_all_notes, 
+      '(O|only)|percentage|exclude|boreal forest of western Canada'
+    )
+  ]
+)
+q1_3_filter_out
+```
+
+```{r}
+q1_3 = q1_3 |>
+  mutate(
+    across(
+      .cols = c(Estimate, Lower, Upper),
+      ~ case_when(Flags %in% q1_3_filter_out ~ NA,
+                  Respondent == 2 & Category == 'Anthropogenic' & Question == '1.0' ~ NA, # values are orders of magnitude higher than all others, I'm questioning the units
+                  TRUE ~ .)
+    )
+  )
 ```
 
 ```{r}
@@ -138,15 +222,13 @@ q1_3 |>
   mutate(errors = case_when(!is.na(Flags) ~ 1,
                             TRUE ~ 0)) |>
   summarise(error_rate = sum(errors)/n())
-
-
 ```
 
 Long Version
 
 ```{r}
 q1_3_long = q1_3 |>
-  pivot_longer(Lower:`Even Chance`, 
+  pivot_longer(Estimate:Upper, 
                names_to = 'Estimate Type', 
                values_to = 'Carbon Impact') |>
   mutate(
@@ -168,30 +250,30 @@ q1_3_summary = q1_3 |>
   summarise(
     across(
       .cols = c(
-        Upper, Lower, `Even Chance`, Expertise, Confidence
+        Estimate, Lower, Upper, Expertise, Confidence
       ),
-      ~ mean(.x, na.rm = TRUE),
+      ~ mean(., na.rm = TRUE),
       .names = '{.col} Mean'
     ),
     across(
       .cols = c(
-        Upper, Lower, `Even Chance`, Expertise, Confidence
+        Estimate, Lower, Upper, Expertise, Confidence
       ),
-      ~ median(.x, na.rm = TRUE),
+      ~ median(., na.rm = TRUE),
       .names = '{.col} Median'
     ),
     across(
       .cols = c(
-        Upper, Lower, `Even Chance`, Expertise, Confidence
+        Estimate, Lower, Upper, Expertise, Confidence
       ),
-      ~ sd(.x, na.rm = TRUE),
+      ~ sd(., na.rm = TRUE),
       .names = '{.col} SD'
     ),
     across(
       .cols = c(
-        Upper, Lower, `Even Chance`, Expertise, Confidence
+        Estimate, Lower, Upper, Expertise, Confidence
       ),
-      ~ sd(.x, na.rm = TRUE)/n(),
+      ~ sd(., na.rm = TRUE)/n(),
       .names = '{.col} SE'
     ),
     .by = c(Question, `Whole Question`, Category, Scenario, Timescale)
@@ -205,31 +287,36 @@ q1_3_summary = q1_3 |>
   )
 ```
 
+Q1/3 Notes
+
+```{r}
+q1_3_notes = read_excel(
+  './data/Q1_3.xlsx',
+  sheet = 2
+)
+```
+
 
 ## Q2
 
 ```{r}
-q2 = read_excel('./data/Q2.xlsx', 
-  range = 'A7:L363',
-  col_names = colnames(
-    read_excel('./data/Q2.xlsx', range = 'A1:L1')
-    )
-) |>
-  rename_with(~str_to_title(.)) |>
+q2 = read_excel('./data/Q2.xlsx') |>
+  filter(Respondent != 37 & `QA/QC Completed` == 'yes') |>
+  rename_with(~str_to_title(.), .cols = Respondent:Flags) |>
   rename_with(
-    ~ str_split(.x, ' ', simplify = TRUE)[,3], 
+    ~ str_split(., ' ', simplify = TRUE)[,3], 
     .cols = matches('level')
   ) |>
   mutate(
     across(
       .cols = c(Frequency, Extent, Range, Severity),
-      ~ case_when(.x == '-' ~ '0',
-                  TRUE ~ .x) |>
+      ~ case_when(. == '-' ~ '0',
+                  TRUE ~ .) |>
         as.numeric()
     ),
     across(
       .cols = c(Expertise, Confidence),
-      ~ as.numeric(.x)
+      ~ as.numeric(.)
       ),
     Scenario = factor(
       case_when(
@@ -253,7 +340,11 @@ q2 = read_excel('./data/Q2.xlsx',
       )
   ) |>
   mutate(`Whole Question` = as.numeric(str_sub(Question, 1, 1)),
-         .after = Respondent)
+         .after = Respondent) |>
+  full_join(participant_frame |>
+              filter(`Whole Question`== 2),
+            by = colnames(participant_frame)) |>
+  arrange(Category, Respondent, `Whole Question`, Timescale, Scenario)
 ```
 
 Long Version
@@ -274,28 +365,28 @@ q2_summary = q2 |>
       .cols = c(
         Frequency, Extent, Range, Severity, Expertise, Confidence
       ),
-      ~ mean(.x, na.rm = TRUE),
+      ~ mean(., na.rm = TRUE),
       .names = '{.col} Mean'
     ),
     across(
       .cols = c(
         Frequency, Extent, Range, Severity, Expertise, Confidence
       ),
-      ~ median(.x, na.rm = TRUE),
+      ~ median(., na.rm = TRUE),
       .names = '{.col} Median'
     ),
     across(
       .cols = c(
         Frequency, Extent, Range, Severity, Expertise, Confidence
       ),
-      ~ sd(.x, na.rm = TRUE),
+      ~ sd(., na.rm = TRUE),
       .names = '{.col} SD'
     ),
     across(
       .cols = c(
         Frequency, Extent, Range, Severity, Expertise, Confidence
       ),
-      ~ sd(.x, na.rm = TRUE)/n(),
+      ~ sd(., na.rm = TRUE)/n(),
       .names = '{.col} SE'
     ),
     .by = c(Question, `Whole Question`, Category, Scenario, Timescale)
@@ -307,6 +398,13 @@ q2_summary = q2 |>
       Scenario == 'RCP 8.5' ~ as.numeric(Timescale) + 0.3
     )
   )
+```
+
+```{r}
+q2_notes = read_excel(
+  './data/Q2.xlsx',
+  sheet = 2
+)
 ```
 
 
@@ -328,9 +426,26 @@ q4 = read_excel('./data/Q4_figure.xlsx',
       Subquestion == 'iv' ~ 'Indirect Effects'
     ),
     across(.cols = c(Availability, Consensus),
-           ~ (.x - 0.5)*2)
-  )
+           ~ (. - 0.5)*2),
+    `Whole Question` = as.numeric(str_sub(Question, 1, 1)),
+  ) |>
+  full_join(participant_frame |>
+              filter(`Whole Question`== 4) |>
+              select(-c(Timescale, Scenario)) |>
+              cross_join(
+                tibble(Subquestion = c('i', 'ii', 'iii', 'iv'))
+                ),
+            by = c('Category', 'Whole Question', 'Respondent', 'Question', 'Subquestion')) |>
+  arrange(Category, Respondent, `Whole Question`, Subquestion)
 ```
+
+```{r}
+q4_notes = read_excel(
+  './data/Q4_figure.xlsx',
+  sheet = 2
+)
+```
+
 
 ## Completion Rates
 
@@ -364,15 +479,13 @@ frame = expand_grid(Category = c('Anthropogenic',
     )
   )
 
-
 respondents = q1_3 |>
-  mutate(`Whole Question` = as.numeric(str_sub(Question, 1, 1))) |>
   summarise(
     Completion = factor(
       case_when(
-        all(!is.na(Lower)) & all(!is.na(Upper)) & all(!is.na(`Even Chance`)) ~ 'Complete',
-        any(!is.na(Lower)) | any(!is.na(Upper)) | any(!is.na(`Even Chance`)) ~ 'Partial',
-        all(is.na(Lower)) & all(is.na(Upper)) & all(is.na(`Even Chance`)) ~ 'Missing'
+        all(!is.na(Lower)) & all(!is.na(Upper)) & all(!is.na(Estimate)) ~ 'Complete',
+        any(!is.na(Lower)) | any(!is.na(Upper)) | any(!is.na(Estimate)) ~ 'Partial',
+        all(is.na(Lower)) & all(is.na(Upper)) & all(is.na(Estimate)) ~ 'Missing'
       ),
       levels = c('Missing', 'Partial', 'Complete')
     ),
@@ -380,7 +493,6 @@ respondents = q1_3 |>
   ) |>
   rbind(
     q2_long |>
-      mutate(`Whole Question` = as.numeric(str_sub(Question, 1, 1))) |>
       summarise(
         Completion = factor(
           case_when(
@@ -395,7 +507,6 @@ respondents = q1_3 |>
   ) |>
   rbind(
     q4 |>
-      mutate(`Whole Question` = as.numeric(str_sub(Question, 1, 1))) |>
       summarise(
         Completion = factor(
           case_when(
@@ -414,7 +525,8 @@ respondents = q1_3 |>
             .by = c(Category, `Whole Question`, Timescale, Completion)) |>
   full_join(frame, by = c('Category', 'Whole Question', 'Timescale', 'Completion')) |>
   mutate(Count = case_when(is.na(Count) ~ 0,
-                           TRUE ~ Count))
+                           TRUE ~ Count)) |>
+  arrange(Category, `Whole Question`, Timescale)
 ```
 
 
@@ -512,15 +624,15 @@ ggplot(expertise,
 
 ### Violin Plot
 
-```{r, fig.height = 6.5, fig.width = 6.5}
+```{r, fig.height = 9, fig.width = 6.5}
 # Median values across respondents
 ggplot(q1_3, 
        aes(x = Timescale,
-           y = `Even Chance`,
+           y = Estimate,
            fill = Scenario)) +
   geom_hline(yintercept = 0,
              color = 'gray30') +
-  geom_point(aes(y = `Even Chance`,
+  geom_point(aes(y = Estimate,
                  color = Scenario),
              position = position_jitterdodge(dodge.width = 0.9,
                                              jitter.width = 0.7,
@@ -553,8 +665,8 @@ ggplot(q1_3,
   geom_linerange(data = q1_3_summary,
                  aes(xmin = `Dodged Timescale` - 0.1, 
                      xmax = `Dodged Timescale` + 0.1,
-                     y = `Even Chance Median`,
-                     linewidth = 'Even Chance'),
+                     y = `Estimate Median`,
+                     linewidth = 'Estimate'),
                  color = 'black') +
   geom_linerange(data = q1_3_summary,
                  aes(xmin = `Dodged Timescale` - 0.075, 
@@ -613,7 +725,7 @@ ggplot(q1_3,
 ### Histograms
 
 ```{r}
-# lower
+# Lower
 ggplot(q1_3, 
        aes(x = Lower,
            color = Scenario)) +
@@ -623,7 +735,7 @@ ggplot(q1_3,
   facet_grid(Question ~ Category, scales = 'free') +
   ggtitle('Lower')
 
-# upper
+# Upper
 ggplot(q1_3, 
        aes(x = Upper,
            color = Scenario)) +
@@ -635,7 +747,7 @@ ggplot(q1_3,
 
 # even chance
 ggplot(q1_3, 
-       aes(x = `Even Chance`,
+       aes(x = Estimate,
            color = Scenario)) +
   geom_density() +
   scale_color_manual(name = 'Emissions\nPathway',
@@ -644,8 +756,43 @@ ggplot(q1_3,
   ggtitle('Even Chance')
 ```
 
+By Expertise
+
+```{r}
+ggplot(q1_3 |>
+         filter(
+           `Whole Question` == 1
+         ),
+       aes(x = Estimate, y = `Expertise Group`)) +
+  geom_density_ridges() +
+  facet_wrap(~ Category)
+
+ggplot(q1_3 |>
+         filter(
+           `Whole Question` == 3 & Timescale == '2100'
+         ),
+       aes(x = Estimate, y = `Expertise Group`,
+           fill = Scenario)) +
+  geom_density_ridges(alpha = 0.5) +
+  scale_fill_manual(name = 'Emissions\nPathway',
+                     values = scenario_colors[2:4]) +
+  facet_wrap(~ Category, scales = 'free')
+
+ggplot(q1_3 |>
+         filter(
+           `Whole Question` == 3 & Timescale == '2300'
+         ),
+       aes(x = Estimate, y = `Expertise Group`,
+           fill = Scenario)) +
+  geom_density_ridges(alpha = 0.5) +
+  scale_fill_manual(name = 'Emissions\nPathway',
+                     values = scenario_colors[2:4]) +
+  facet_wrap(~ Category, scales = 'free')
+```
+
+
 ### Summarized Values
-Even chance values which fall outside of lower-upper range, could be due to some people not filling in all boxes?
+Even chance values which fall outside of Lower-Upper range, could be due to some people not filling in all boxes?
 
 ```{r}
 # Mean values across respondents
@@ -663,11 +810,11 @@ ggplot(q1_3_summary,
              position = position_dodge(width = 0.75),
              width = 0.25,
              alpha = 0.5) +
-  geom_point(aes(y = `Even Chance Mean`),
+  geom_point(aes(y = `Estimate Mean`),
              position = position_dodge(width = 0.75),
              size = 3) +
-  geom_errorbar(aes(ymin = `Even Chance Mean` - `Even Chance SD`,
-                    ymax = `Even Chance Mean` + `Even Chance SD`),
+  geom_errorbar(aes(ymin = `Estimate Mean` - `Estimate SD`,
+                    ymax = `Estimate Mean` + `Estimate SD`),
              position = position_dodge(width = 0.75),
              width = 0.5) +
   geom_point(aes(y = `Upper Mean`),
@@ -707,11 +854,11 @@ ggplot(q1_3_summary,
              position = position_dodge(width = 0.75),
              width = 0.25,
              alpha = 0.5) +
-  geom_point(aes(y = `Even Chance Median`),
+  geom_point(aes(y = `Estimate Median`),
              position = position_dodge(width = 0.75),
              size = 3) +
-  geom_errorbar(aes(ymin = `Even Chance Median` - `Even Chance SD`,
-                    ymax = `Even Chance Median` + `Even Chance SD`),
+  geom_errorbar(aes(ymin = `Estimate Median` - `Estimate SD`,
+                    ymax = `Estimate Median` + `Estimate SD`),
              position = position_dodge(width = 0.75),
              width = 0.5) +
   geom_point(aes(y = `Upper Median`),
