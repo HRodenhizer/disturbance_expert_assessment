@@ -45,6 +45,12 @@ question_frame = expand_grid(
     )
   ) |>
   mutate(
+    Category = factor(Category,
+                      levels = c('Anthropogenic',
+                                 'Biotic',
+                                 'Fire',
+                                 'Permafrost',
+                                 'Weather')),
     Timescale = factor(
       Timescale,
       levels = c('Current', '2100', '2300')
@@ -61,7 +67,7 @@ participant_frame = question_frame |>
       x = c(
         paste('Anthropogenic', 1:10, sep = '_'),
         paste('Biotic', 1:13, sep = '_'),
-        paste('Fire', c(1:20, 22), sep = '_'),
+        paste('Fire', c(1:21), sep = '_'),
         paste('Permafrost', 1:22, sep = '_'),
         paste('Weather', 1:11, sep = '_')
       )
@@ -69,7 +75,15 @@ participant_frame = question_frame |>
       separate_wider_delim(cols = x, 
                            names = c('Category', 'Respondent'),
                            delim = '_') |>
-      mutate(Respondent = as.numeric(Respondent)),
+      mutate(
+        Category = factor(Category,
+                          levels = c('Anthropogenic',
+                                     'Biotic',
+                                     'Fire',
+                                     'Permafrost',
+                                     'Weather')),
+        Respondent = as.numeric(Respondent)
+      ),
     by = c('Category')
   ) |>
   arrange(Category, Respondent, `Whole Question`, Timescale) |>
@@ -85,6 +99,18 @@ participant_frame = question_frame |>
     )
 ```
 
+## Participant Key
+
+```{r}
+key = read_excel('./data/Expert assessment_participant key.xlsx') |>
+  select(-2) |>
+  rename(Respondent = Number) |>
+  pivot_longer(Anthropogenic:Weather, 
+               names_to = 'Category', 
+               values_to = 'Name') |>
+  filter(!is.na(Name)) |>
+  arrange(Category, Name)
+```
 
 ## Q1/3
 
@@ -96,7 +122,6 @@ q1_3 = read_excel(
   #   read_excel('./data/Q1_3.xlsx', n_max = 1)
   #   )
 ) |>
-  filter(Respondent != 37 & `QA/QC Completed` == 'yes') |>
   rename_with(~str_to_title(.), .cols = Respondent:Flags) |>
   rename_with(
     ~ str_split(., ' ', simplify = TRUE)[,3], 
@@ -104,6 +129,16 @@ q1_3 = read_excel(
   ) |>
   rename(`Lower Range` = Lower, `Upper Range` = Upper) |>
   mutate(
+    Category = factor(
+      Category,
+      levels = c(
+        'Anthropogenic',
+        'Biotic',
+        'Fire',
+        'Permafrost',
+        'Weather'
+      )
+    ),
     Scenario = factor(
       case_when(
         Scenario == 'Present day' ~ 'Current',
@@ -177,7 +212,11 @@ q1_3 = read_excel(
   full_join(participant_frame |>
               filter(`Whole Question` %in% c(1, 3)),
             by = colnames(participant_frame)) |>
+  inner_join(key,
+            by = c('Category', 'Respondent')) |>
   arrange(Category, Respondent, `Whole Question`, Timescale, Scenario)
+
+nrow(q1_3) == nrow(key)*7 # 1 row for q1, 3 for q3a, and 3 for q3b
 ```
 
 ```{r}
@@ -200,12 +239,10 @@ q1_3_filter_out
 ```{r}
 q1_3 = q1_3 |>
   mutate(
-    across(
-      .cols = c(Estimate, Lower, Upper),
-      ~ case_when(Flags %in% q1_3_filter_out ~ NA,
-                  Respondent == 2 & Category == 'Anthropogenic' & Question == '1.0' ~ NA, # values are orders of magnitude higher than all others, I'm questioning the units
-                  TRUE ~ .)
-    )
+    include = case_when(
+      Flags %in% q1_3_filter_out ~ FALSE,
+      Respondent == 2 & Category == 'Anthropogenic' & Question == '1.0' ~ FALSE, # values are orders of magnitude higher than all others, I'm questioning the units
+      TRUE ~ TRUE)
   )
 ```
 
@@ -228,6 +265,7 @@ Long Version
 
 ```{r}
 q1_3_long = q1_3 |>
+  filter(include == TRUE) |>
   pivot_longer(Estimate:Upper, 
                names_to = 'Estimate Type', 
                values_to = 'Carbon Impact') |>
@@ -247,6 +285,7 @@ Summarized Version
 
 ```{r}
 q1_3_summary = q1_3 |>
+  filter(include == TRUE) |>
   summarise(
     across(
       .cols = c(
@@ -279,10 +318,15 @@ q1_3_summary = q1_3 |>
     .by = c(Question, `Whole Question`, Category, Scenario, Timescale)
   ) |>
   mutate(
-    `Dodged Timescale` = case_when(
+    `Dodged Timescale 1` = case_when(
       Scenario %in%  c('Current', '2 C') ~ as.numeric(Timescale),
       Scenario == '1.5 C' ~ as.numeric(Timescale) - 0.3,
       Scenario == 'RCP 8.5' ~ as.numeric(Timescale) + 0.3
+    ),
+    `Dodged Timescale 2` = case_when(
+      Scenario %in%  c('Current', '2 C') ~ as.numeric(Category),
+      Scenario == '1.5 C' ~ as.numeric(Category) - 0.3,
+      Scenario == 'RCP 8.5' ~ as.numeric(Category) + 0.3
     )
   )
 ```
@@ -293,7 +337,9 @@ Q1/3 Notes
 q1_3_notes = read_excel(
   './data/Q1_3.xlsx',
   sheet = 2
-)
+) |>
+  inner_join(key,
+            by = c('Category', 'Respondent'))
 ```
 
 
@@ -344,7 +390,11 @@ q2 = read_excel('./data/Q2.xlsx') |>
   full_join(participant_frame |>
               filter(`Whole Question`== 2),
             by = colnames(participant_frame)) |>
+  inner_join(key,
+            by = c('Category', 'Respondent')) |>
   arrange(Category, Respondent, `Whole Question`, Timescale, Scenario)
+
+nrow(q2) == nrow(key)*6
 ```
 
 Long Version
@@ -392,10 +442,15 @@ q2_summary = q2 |>
     .by = c(Question, `Whole Question`, Category, Scenario, Timescale)
   ) |>
   mutate(
-    `Dodged Timescale` = case_when(
+    `Dodged Timescale 1 1` = case_when(
       Scenario %in%  c('Current', '2 C') ~ as.numeric(Timescale),
       Scenario == '1.5 C' ~ as.numeric(Timescale) - 0.3,
       Scenario == 'RCP 8.5' ~ as.numeric(Timescale) + 0.3
+    ),
+    `Dodged Timescale 2` = case_when(
+      Scenario %in%  c('Current', '2 C') ~ as.numeric(Category),
+      Scenario == '1.5 C' ~ as.numeric(Category) - 0.3,
+      Scenario == 'RCP 8.5' ~ as.numeric(Category) + 0.3
     )
   )
 ```
@@ -404,7 +459,9 @@ q2_summary = q2 |>
 q2_notes = read_excel(
   './data/Q2.xlsx',
   sheet = 2
-)
+) |>
+  inner_join(key,
+            by = c('Category', 'Respondent'))
 ```
 
 
@@ -436,7 +493,40 @@ q4 = read_excel('./data/Q4_figure.xlsx',
                 tibble(Subquestion = c('i', 'ii', 'iii', 'iv'))
                 ),
             by = c('Category', 'Whole Question', 'Respondent', 'Question', 'Subquestion')) |>
+  inner_join(key,
+            by = c('Category', 'Respondent')) |>
   arrange(Category, Respondent, `Whole Question`, Subquestion)
+
+nrow(q4) == nrow(key)*4
+```
+
+Summarized Version
+
+```{r}
+q4_summary = q4 |>
+  summarise(
+    across(
+      .cols = Availability:Consensus,
+      ~ mean(., na.rm = TRUE),
+      .names = '{.col} Mean'
+    ),
+    across(
+      .cols = Availability:Consensus,
+      ~ median(., na.rm = TRUE),
+      .names = '{.col} Median'
+    ),
+    across(
+      .cols = Availability:Consensus,
+      ~ sd(., na.rm = TRUE),
+      .names = '{.col} SD'
+    ),
+    across(
+      .cols = Availability:Consensus,
+      ~ sd(., na.rm = TRUE)/n(),
+      .names = '{.col} SE'
+    ),
+    .by = c(Question, `Whole Question`, Category, Aspect)
+  )
 ```
 
 ```{r}
@@ -444,6 +534,21 @@ q4_notes = read_excel(
   './data/Q4_figure.xlsx',
   sheet = 2
 )
+```
+
+```{r}
+q4_notes_summary = q4_notes |>
+  summarise(across(
+      .cols = Confidence,
+      ~ mean(as.numeric(.), na.rm = TRUE),
+      .names = '{.col} Mean'
+    ),
+    across(
+      .cols = Confidence,
+      ~ median(as.numeric(.), na.rm = TRUE),
+      .names = '{.col} Median'
+    ),
+    .by = c(Category))
 ```
 
 
@@ -548,9 +653,15 @@ ggplot(respondents,
   geom_bar(width = 0.46, position = position_dodge(width = 0.5),
            stat = 'identity') +
   scale_color_viridis(discrete = TRUE,
-                     direction = -1) +
+                     direction = -1,
+                     option = 'inferno',
+                     begin = 0.1,
+                     end = 0.9) +
   scale_fill_viridis(discrete = TRUE,
-                     direction = -1) +
+                     direction = -1,
+                     option = 'inferno',
+                     begin = 0.1,
+                     end = 0.9) +
   scale_x_discrete(name = 'Question') +
   scale_y_continuous(name = 'Number of Respondents') +
   facet_grid(Category ~ `Whole Question`, scales = 'free_x') +
@@ -626,6 +737,7 @@ ggplot(expertise,
 
 ```{r, fig.height = 9, fig.width = 6.5}
 # Median values across respondents
+# with outliers
 ggplot(q1_3, 
        aes(x = Timescale,
            y = Estimate,
@@ -663,20 +775,111 @@ ggplot(q1_3,
                      values = scenario_colors,
                      guide = guide_legend(ncol = 2)) +
   geom_linerange(data = q1_3_summary,
-                 aes(xmin = `Dodged Timescale` - 0.1, 
-                     xmax = `Dodged Timescale` + 0.1,
+                 aes(xmin = `Dodged Timescale 1` - 0.1, 
+                     xmax = `Dodged Timescale 1` + 0.1,
                      y = `Estimate Median`,
                      linewidth = 'Estimate'),
                  color = 'black') +
   geom_linerange(data = q1_3_summary,
-                 aes(xmin = `Dodged Timescale` - 0.075, 
-                     xmax = `Dodged Timescale` + 0.075,
+                 aes(xmin = `Dodged Timescale 1` - 0.075, 
+                     xmax = `Dodged Timescale 1` + 0.075,
                      y = `Lower Median`,
                      linewidth = 'Lower/Upper'),
                  color = 'black') +
   geom_linerange(data = q1_3_summary,
-                 aes(xmin = `Dodged Timescale` - 0.075, 
-                     xmax = `Dodged Timescale` + 0.075,
+                 aes(xmin = `Dodged Timescale 1` - 0.075, 
+                     xmax = `Dodged Timescale 1` + 0.075,
+                     y = `Upper Median`,
+                     linewidth = 'Lower/Upper'),
+                 color = 'black') +
+  scale_linewidth_manual(
+    name = 'Median Values',
+    values = c(0.7, 0.3),
+    # guide = guide_legend(
+    #   theme = theme(legend.title = element_blank())
+    # )
+  ) +
+  scale_y_continuous(name = expression('Tg C yr'^-1),
+                     transform = "asinh",
+                     breaks = c(-1000, -100, -10, -1, 0, 1, 10, 100, 1000, 10000),
+                     minor_breaks = c(
+                       seq(-4000, -1000, by = 1000),
+                       seq(-900, -100, by = 100),
+                       seq(-90, -10, by = 10),
+                       seq(-9, -1, by = 1),
+                       seq(-0.9, -0.1, by = 0.1),
+                       seq(0.1, 0.9, by = 0.1),
+                       seq(1, 9, by = 1),
+                       seq(10, 90, by = 10),
+                       seq(100, 900, by = 100),
+                       seq(1000, 9000, by = 1000),
+                       seq(10000, 50000, by = 10000)
+                     ),
+                     # labels = function(x) format(x, scientific = TRUE),
+                     # minor_breaks = c(
+                     #   -500, -50, -5, -0.5, 0.5, 5, 50, 500, 5000
+                     #   ),
+                     guide = "axis_logticks") +
+  facet_wrap(~ Category, ncol = 2) +
+  theme(axis.title.x = element_blank(),
+        axis.text.x = element_text(angle = 45, hjust = 1),
+        legend.position = 'inside',
+        legend.position.inside = c(0.75, 0.13),
+        legend.justification = c(0.5, 0.5))
+
+# without outliers
+ggplot(q1_3 |>
+       filter(include == TRUE), 
+       aes(x = Timescale,
+           y = Estimate,
+           fill = Scenario)) +
+  geom_hline(yintercept = 0,
+             color = 'gray30') +
+  geom_point(aes(y = Estimate,
+                 color = Scenario),
+             position = position_jitterdodge(dodge.width = 0.9,
+                                             jitter.width = 0.7,
+                                             seed = 1),
+             size = 1,
+             alpha = 0.5) +
+  geom_segment(aes(y = Lower,
+                   yend = Upper,
+                   color = Scenario),
+             position = position_jitterdodge(dodge.width = 0.9,
+                                             jitter.width = 0.7,
+                                             seed = 1),
+             width = 0,
+             alpha = 0.5) +
+  geom_violin(color = 'gray10',
+              alpha = 0.25,
+              position = position_dodge(width = 0.9)) +
+  # scale_color_viridis(name = 'Emissions\nPathway',
+  #                     begin = 0.1,
+  #                     end = 0.9,
+  #                     discrete = TRUE,
+  #                     option = 'inferno',
+  #                     direction = -1) +
+  scale_color_manual(name = 'Emissions Pathway',
+                     values = scenario_colors,
+                     guide = guide_legend(ncol = 2)) +
+  scale_fill_manual(name = 'Emissions Pathway',
+                     values = scenario_colors,
+                     guide = guide_legend(ncol = 2)) +
+  geom_linerange(data = q1_3_summary,
+                 aes(xmin = `Dodged Timescale 1` - 0.1, 
+                     xmax = `Dodged Timescale 1` + 0.1,
+                     y = `Estimate Median`,
+                     linewidth = 'Estimate'),
+                 color = 'black') +
+  geom_linerange(data = q1_3_summary,
+                 aes(xmin = `Dodged Timescale 1` - 0.075, 
+                     xmax = `Dodged Timescale 1` + 0.075,
+                     y = `Lower Median`,
+                     linewidth = 'Lower/Upper'),
+                 color = 'black') +
+  geom_linerange(data = q1_3_summary,
+                 aes(xmin = `Dodged Timescale 1` - 0.075, 
+                     xmax = `Dodged Timescale 1` + 0.075,
                      y = `Upper Median`,
                      linewidth = 'Lower/Upper'),
                  color = 'black') +
@@ -721,6 +924,106 @@ ggplot(q1_3,
 #        height = 6.5, width = 6.5)
 ```
 
+```{r, fig.height = 6.5, fig.width = 6.5}
+ggplot(q1_3 |>
+       filter(include == TRUE), 
+       aes(x = Category,
+           y = Estimate,
+           fill = Scenario)) +
+  geom_hline(yintercept = 0,
+             color = 'gray30') +
+  geom_point(aes(y = Estimate,
+                 color = Scenario),
+             position = position_jitterdodge(dodge.width = 0.9,
+                                             jitter.width = 0.7,
+                                             seed = 1),
+             size = 1,
+             alpha = 0.5) +
+  geom_segment(aes(y = Lower,
+                   yend = Upper,
+                   color = Scenario),
+             position = position_jitterdodge(dodge.width = 0.9,
+                                             jitter.width = 0.7,
+                                             seed = 1),
+             width = 0,
+             alpha = 0.5) +
+  geom_violin(color = 'gray10',
+              alpha = 0.25,
+              position = position_dodge(width = 0.9)) +
+  # scale_color_viridis(name = 'Emissions\nPathway',
+  #                     begin = 0.1,
+  #                     end = 0.9,
+  #                     discrete = TRUE,
+  #                     option = 'inferno',
+  #                     direction = -1) +
+  scale_color_manual(
+    name = 'Emissions\nPathway',
+    values = scenario_colors#,
+    # guide = guide_legend(ncol = 2)
+  ) +
+  scale_fill_manual(
+    name = 'Emissions\nPathway',
+    values = scenario_colors#,
+    # guide = guide_legend(ncol = 2)
+  ) +
+  geom_linerange(data = q1_3_summary,
+                 aes(xmin = `Dodged Timescale 2` - 0.1, 
+                     xmax = `Dodged Timescale 2` + 0.1,
+                     y = `Estimate Median`,
+                     linewidth = 'Estimate'),
+                 color = 'black') +
+  geom_linerange(data = q1_3_summary,
+                 aes(xmin = `Dodged Timescale 2` - 0.075, 
+                     xmax = `Dodged Timescale 2` + 0.075,
+                     y = `Lower Median`,
+                     linewidth = 'Lower/Upper'),
+                 color = 'black') +
+  geom_linerange(data = q1_3_summary,
+                 aes(xmin = `Dodged Timescale 2` - 0.075, 
+                     xmax = `Dodged Timescale 2` + 0.075,
+                     y = `Upper Median`,
+                     linewidth = 'Lower/Upper'),
+                 color = 'black') +
+  scale_linewidth_manual(
+    name = 'Median Values',
+    values = c(0.7, 0.3),
+    # guide = guide_legend(
+    #   theme = theme(legend.title = element_blank())
+    # )
+  ) +
+  scale_y_continuous(name = expression('Tg C yr'^-1),
+                     transform = "asinh",
+                     breaks = c(-1000, -100, -10, -1, 0, 1, 10, 100, 1000, 10000),
+                     minor_breaks = c(
+                       seq(-4000, -1000, by = 1000),
+                       seq(-900, -100, by = 100),
+                       seq(-90, -10, by = 10),
+                       seq(-9, -1, by = 1),
+                       seq(-0.9, -0.1, by = 0.1),
+                       seq(0.1, 0.9, by = 0.1),
+                       seq(1, 9, by = 1),
+                       seq(10, 90, by = 10),
+                       seq(100, 900, by = 100),
+                       seq(1000, 9000, by = 1000),
+                       seq(10000, 50000, by = 10000)
+                     ),
+                     # labels = function(x) format(x, scientific = TRUE),
+                     # minor_breaks = c(
+                     #   -500, -50, -5, -0.5, 0.5, 5, 50, 500, 5000
+                     #   ),
+                     guide = "axis_logticks") +
+  facet_wrap(~ Timescale, ncol = 1)# +
+  # theme(axis.title.x = element_blank(),
+  #       axis.text.x = element_text(angle = 45, hjust = 1),
+  #       legend.position = 'inside',
+  #       legend.position.inside = c(0.75, 0.13),
+  #       legend.justification = c(0.5, 0.5))
+
+# ggsave('./figures/q1_3_violin_categories.pdf',
+#        height = 6.5, width = 6.5)
+# ggsave('./figures/q1_3_violin_categories.jpg',
+#        height = 6.5, width = 6.5)
+```
 
 ### Histograms
 
@@ -935,6 +1238,7 @@ ggplot(q1_3 |>
     values = c('solid', 'dashed'),
     guide = guide_legend(title = element_blank())
   ) +
+  scale_x_continuous(limits = c(0, 5)) +
   scale_y_continuous(name = 'Number of Respondents',
                      breaks = seq(0, 10, by = 2)) +
   facet_grid(Category ~ .)
@@ -968,6 +1272,7 @@ ggplot(
     values = c('solid', 'dashed'),
     guide = guide_legend(title = element_blank())
   ) +
+  scale_x_continuous(limits = c(0, 5)) +
   scale_y_continuous(name = 'Number of Respondents',
                      breaks = seq(0, 10, by = 2)) +
   facet_grid(Category ~ Scenario)
@@ -1048,15 +1353,99 @@ ggplot(q2_long,
 #        width = 6.5)
 ```
 
+### Q2 Confidence
+
+```{r, fig.height = 6.5, fig.width = 6.5}
+ggplot(
+  q2 |>
+    filter(Question == '2a')
+) +
+  geom_bar(aes(x = Confidence),
+           position = position_dodge()) +
+  geom_vline(data = q2_summary |>
+               filter(Question == '2a'),
+             aes(xintercept = `Confidence Mean`,
+                 linetype = 'Mean')) +
+  geom_vline(data = q2_summary |>
+               filter(Question == '2a'),
+             aes(xintercept = `Confidence Median`,
+                 linetype = 'Median')) +
+  scale_linetype_manual(
+    values = c('solid', 'dashed'),
+    guide = guide_legend(title = element_blank())
+  ) +
+  scale_x_continuous(limits = c(0, 5)) +
+  scale_y_continuous(name = 'Number of Respondents') +
+  facet_grid(Category ~ Scenario)
+
+# ggsave('./figures/q2a_confidence.pdf',
+#        height = 6.5, 
+#        width = 6.5)
+# ggsave('./figures/q2a_confidence.jpg',
+#        height = 6.5, 
+#        width = 6.5)
+```
+
+```{r, fig.height = 6.5, fig.width = 6.5}
+ggplot(
+  q2 |>
+    filter(Question == '2b')
+) +
+  geom_bar(aes(x = Confidence),
+           position = position_dodge()) +
+  geom_vline(data = q2_summary |>
+               filter(Question == '2b'),
+             aes(xintercept = `Confidence Mean`,
+                 linetype = 'Mean')) +
+  geom_vline(data = q2_summary |>
+               filter(Question == '2b'),
+             aes(xintercept = `Confidence Median`,
+                 linetype = 'Median')) +
+  scale_linetype_manual(
+    values = c('solid', 'dashed'),
+    guide = guide_legend(title = element_blank())
+  ) +
+  scale_y_continuous(name = 'Number of Respondents') +
+  facet_grid(Category ~ Scenario)
+
+# ggsave('./figures/q2b_confidence.pdf',
+#        height = 6.5, 
+#        width = 6.5)
+# ggsave('./figures/q2b_confidence.jpg',
+#        height = 6.5, 
+#        width = 6.5)
+```
+
+
 ## Q4
 
 ```{r, fig.height = 9, fig.width = 6.5}
-ggplot(q4, aes(x = Availability, y = Consensus, color = Aspect)) +
+ggplot(q4, 
+       aes(x = Availability, y = Consensus, color = Aspect)) +
   geom_hline(yintercept = 0,
              color = 'gray30') +
   geom_vline(xintercept = 0,
              color = 'gray30') +
-  geom_point() +
+  geom_point(alpha = 0.3) +
+  geom_errorbar(data = q4_summary,
+                aes(x = `Availability Mean`,
+                    ymin = `Consensus Mean` - `Consensus SD`,
+                    ymax = `Consensus Mean` + `Consensus SD`, 
+                 color = Aspect,
+                 width = 0.05),
+                inherit.aes = FALSE) +
+  geom_errorbarh(data = q4_summary,
+                aes(y = `Consensus Mean`,
+                    xmin = `Availability Mean` - `Availability SD`,
+                    xmax = `Availability Mean` + `Availability SD`, 
+                 color = Aspect,
+                 height = 0.05),
+                inherit.aes = FALSE) +
+  geom_point(data = q4_summary,
+             aes(x = `Availability Mean`, 
+                 y = `Consensus Mean`, 
+                 color = Aspect),
+             size = 3) +
   geom_text(data = tibble(
     x = c(-0.5, 0.5, -0.5, 0.5),
     y = c(0.95, 0.95, -0.95, -0.95),
@@ -1070,13 +1459,16 @@ ggplot(q4, aes(x = Availability, y = Consensus, color = Aspect)) +
     size = 2.5,
     inherit.aes = FALSE
             ) +
-  scale_x_continuous(limits = c(-1, 1),
+  scale_x_continuous(name = 'Availability of Evidence',
+                     limits = c(-1, 1),
                      breaks = c(-1, 1),
                      labels = c('Low', 'High')) +
-  scale_y_continuous(limits = c(-1, 1),
+  scale_y_continuous(name = 'Consensus of Evidence',
+                     limits = c(-1, 1),
                      breaks = c(-1, 1),
                      labels = c('Low', 'High')) +
-  scale_color_viridis(discrete = TRUE) +
+  scale_color_viridis(discrete = TRUE,
+                      na.translate = FALSE) +
   facet_wrap(~ Category, ncol = 2) +
   coord_fixed(expand = FALSE) +
   theme(legend.position = 'inside',
@@ -1090,4 +1482,35 @@ ggplot(q4, aes(x = Availability, y = Consensus, color = Aspect)) +
 # ggsave('./figures/q4_compiled.jpg',
 #        height = 9,
 #        width = 6.5)
+```
+
+### Q4 Confidence
+
+```{r, fig.height = 6.5, fig.width = 4}
+ggplot(q4_notes
+) +
+  geom_bar(aes(x = as.numeric(Confidence)),
+           position = position_dodge()) +
+  geom_vline(data = q4_notes_summary,
+             aes(xintercept = `Confidence Mean`,
+                 linetype = 'Mean')) +
+  geom_vline(data = q4_notes_summary,
+             aes(xintercept = `Confidence Median`,
+                 linetype = 'Median')) +
+  scale_linetype_manual(
+    values = c('solid', 'dashed'),
+    guide = guide_legend(title = element_blank())
+  ) +
+  scale_x_continuous(name = 'Confidence',
+                     limits = c(0, 5)) +
+  scale_y_continuous(name = 'Number of Respondents',
+                     breaks = seq(0, 10, by = 2)) +
+  facet_grid(Category ~ .)
+
+# ggsave('./figures/q4_confidence.pdf',
+#        height = 6.5, 
+#        width = 4)
+# ggsave('./figures/q4_confidence.jpg',
+#        height = 6.5, 
+#        width = 4)
 ```
