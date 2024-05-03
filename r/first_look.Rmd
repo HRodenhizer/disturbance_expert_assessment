@@ -5,21 +5,25 @@ date: "`r Sys.Date()`"
 output: html_document
 ---
 
-# Load Libraries
+
+# Load Packages
 
 ```{r}
 library(viridis)
 library(readxl)
-library(tidyverse)
 library(ggridges)
+library(tidyverse)
 ```
+
+
+# Set Default Theme for Figures
 
 ```{r}
 theme_set(theme_bw())
 ```
 
 
-# Load Data
+# Build Frame with all Answers
 
 ```{r}
 question_frame = expand_grid(
@@ -96,8 +100,14 @@ participant_frame = question_frame |>
       `Whole Question` == 3 & Timescale == '2300' ~ '3b',
       `Whole Question` == 4 ~ '4a'
     )
-    )
+  )
+
+# write_csv(participant_frame,
+#           'data/participant_frame.csv')
 ```
+
+
+# Load Data
 
 ## Participant Key
 
@@ -109,7 +119,56 @@ key = read_excel('./data/Expert assessment_participant key.xlsx') |>
                names_to = 'Category', 
                values_to = 'Name') |>
   filter(!is.na(Name)) |>
+  mutate(
+    Category = factor(
+      Category,
+      levels = c(
+        'Anthropogenic',
+        'Biotic',
+        'Fire',
+        'Permafrost',
+        'Weather'
+      )
+    )
+  ) |>
   arrange(Category, Name)
+```
+
+## QA/QC Sheet
+
+```{r}
+qa_qc = read_excel('data/QA_QC Notes.xlsx',
+                   sheet = 2) |>
+  mutate(
+    Question = case_when(Question == '1' ~ '1.0',
+                                  TRUE ~ Question),
+    Category = factor(
+      Category,
+      levels = c(
+        'Anthropogenic',
+        'Biotic',
+        'Fire',
+        'Permafrost',
+        'Weather'
+      )
+    ),
+    Scenario = factor(
+      Scenario,
+      levels = c(
+        'Current',
+        '1.5 C',
+        '2 C',
+        'RCP 8.5'
+      )
+    ),
+    Timescale = factor(
+      case_when(Timescale == '2020' ~ 'Current',
+                TRUE ~ as.character(Timescale)),
+      levels = c('Current',
+                 '2100',
+                 '2300')
+    )
+  )
 ```
 
 ## Q1/3
@@ -219,53 +278,21 @@ q1_3 = read_excel(
 nrow(q1_3) == nrow(key)*7 # 1 row for q1, 3 for q3a, and 3 for q3b
 ```
 
-```{r}
-q1_3_all_notes = q1_3 |>
-  filter(!is.na(Flags)) |>
-  pull(Flags)
-q1_3_all_notes
-
-q1_3_filter_out = unique(
-  q1_3_all_notes[
-    str_detect(
-      q1_3_all_notes, 
-      '(O|only)|percentage|exclude|boreal forest of western Canada'
-    )
-  ]
-)
-q1_3_filter_out
-```
+Add Filtering Column
 
 ```{r}
 q1_3 = q1_3 |>
-  mutate(
-    include = case_when(
-      Flags %in% q1_3_filter_out ~ FALSE,
-      Respondent == 2 & Category == 'Anthropogenic' & Question == '1.0' ~ FALSE, # values are orders of magnitude higher than all others, I'm questioning the units
-      TRUE ~ TRUE)
+  left_join(
+    qa_qc,
+    by = c('Category', 'Respondent', 'Whole Question', 'Timescale', 'Scenario', 'Question')
   )
-```
-
-```{r}
-# Percent of respondents with missing values or error
-q1_3 |>
-  summarise(errors = case_when(any(!is.na(Flags)) ~ 1,
-                               TRUE ~ 0),
-            .by = c(Respondent, Category)) |>
-  summarise(error_rate = sum(errors)/n())
-
-# Percent of rows with missing values or error
-q1_3 |>
-  mutate(errors = case_when(!is.na(Flags) ~ 1,
-                            TRUE ~ 0)) |>
-  summarise(error_rate = sum(errors)/n())
 ```
 
 Long Version
 
 ```{r}
 q1_3_long = q1_3 |>
-  filter(include == TRUE) |>
+  filter(Remove != 'maybe' | is.na(Remove)) |>
   pivot_longer(Estimate:Upper, 
                names_to = 'Estimate Type', 
                values_to = 'Carbon Impact') |>
@@ -274,7 +301,7 @@ q1_3_long = q1_3 |>
       `Estimate Type`,
       levels = c(
         'Lower',
-        'Even Chance',
+        'Estimate',
         'Upper'
       )
     )
@@ -285,7 +312,7 @@ Summarized Version
 
 ```{r}
 q1_3_summary = q1_3 |>
-  filter(include == TRUE) |>
+  filter(Remove != 'maybe' | is.na(Remove)) |>
   summarise(
     across(
       .cols = c(
@@ -397,9 +424,27 @@ q2 = read_excel('./data/Q2.xlsx') |>
 nrow(q2) == nrow(key)*6
 ```
 
+Add Filtering Column
+
+```{r}
+q2 = q2 |>
+  full_join(
+    qa_qc |>
+      filter(`Whole Question` ==2),
+    by = c('Category', 'Respondent', 'Whole Question', 'Timescale', 'Scenario', 'Question')
+  )
+```
+
 Long Version
+
 ```{r}
 q2_long = q2 |>
+  pivot_longer(Frequency:Severity, 
+               names_to = 'Variable', 
+               values_to = 'Disturbance Change')
+
+q2_long_clean = q2 |>
+  filter(Remove != 'maybe' | is.na(Remove)) |>
   pivot_longer(Frequency:Severity, 
                names_to = 'Variable', 
                values_to = 'Disturbance Change')
@@ -409,6 +454,7 @@ Summarized Version
 
 ```{r}
 q2_summary = q2 |>
+  filter(Remove != 'maybe' | is.na(Remove)) |>
   mutate(`Whole Question` = as.numeric(str_sub(Question, 1, 1))) |>
   summarise(
     across(
@@ -500,10 +546,23 @@ q4 = read_excel('./data/Q4_figure.xlsx',
 nrow(q4) == nrow(key)*4
 ```
 
+Add Filtering Column
+
+```{r}
+q4 = q4 |>
+  full_join(
+    qa_qc |>
+      filter(`Whole Question` == 4) |>
+      select(-c(Timescale, Scenario)),
+    by = c('Category', 'Respondent', 'Whole Question', 'Question')
+  )
+```
+
 Summarized Version
 
 ```{r}
 q4_summary = q4 |>
+  filter(Remove != 'maybe' | is.na(Remove)) |>
   summarise(
     across(
       .cols = Availability:Consensus,
@@ -551,27 +610,67 @@ q4_notes_summary = q4_notes |>
     .by = c(Category))
 ```
 
-
-## Completion Rates
+## Demographic Information
 
 ```{r}
-frame = expand_grid(Category = c('Anthropogenic',
-                                 'Biotic',
-                                 'Fire',
-                                 'Permafrost',
-                                 'Weather'),
-                    `Whole Question` = c(1, 4),
-                     Timescale = 'Current',
-                     Completion = c('Missing', 'Partial', 'Complete')) |>
+demographics = read_excel('data/Demographic Information.xlsx') |>
+  mutate(
+    across(Gender:`Previous Expert Assessment`, ~ replace_na(.x, 'Not Provided')),
+    Category = factor(
+      Category,
+      levels = c(
+        'Anthropogenic',
+        'Biotic',
+        'Fire',
+        'Permafrost',
+        'Weather'
+      )
+    ),
+    Gender = case_when(Gender == 'F' ~ 'Female',
+                       Gender == 'M' ~ 'Male',
+                       Gender == 'Not Provided' ~ 'Not Provided'),
+    `Career Stage` = factor(
+      case_when(
+        str_detect(`Career Stage`, '^(E|e)arly.*(M|m)id$') ~ 'Mid',
+        str_detect(`Career Stage`, '^(M|m)id.*(E|e)stablished$') ~ 'Established',
+        str_detect(`Career Stage`, '^Late mid or early established$') ~ 'Established',
+        TRUE ~ `Career Stage`
+      ),
+      levels = c('Early',
+                 'Mid',
+                 'Established',
+                 'Not Provided')
+    ),
+    Country = case_when(str_detect(Country, 'Switzerland') ~ 'Switzerland',
+                        TRUE ~ Country)
+  )
+```
+
+
+# Completion Rates
+
+```{r}
+completion_frame = expand_grid(
+  Category = c('Anthropogenic',
+               'Biotic',
+               'Fire',
+               'Permafrost',
+               'Weather'),
+  `Whole Question` = c(1, 4),
+  Timescale = 'Current',
+  Completion = c('Missing', 'Partial', 'Complete')
+) |>
   rbind(
-    expand_grid(Category = c('Anthropogenic',
-                                 'Biotic',
-                                 'Fire',
-                                 'Permafrost',
-                                 'Weather'),
-                    `Whole Question` = c(2, 3),
-                     Timescale = c('2100', '2300'),
-                Completion = c('Missing', 'Partial', 'Complete'))
+    expand_grid(
+      Category = c('Anthropogenic',
+                   'Biotic',
+                   'Fire',
+                   'Permafrost',
+                   'Weather'),
+      `Whole Question` = c(2, 3),
+      Timescale = c('2100', '2300'),
+      Completion = c('Missing', 'Partial', 'Complete')
+    )
   ) |>
   mutate(
     Timescale = factor(
@@ -628,7 +727,10 @@ respondents = q1_3 |>
   ) |>
   summarise(Count = n(),
             .by = c(Category, `Whole Question`, Timescale, Completion)) |>
-  full_join(frame, by = c('Category', 'Whole Question', 'Timescale', 'Completion')) |>
+  full_join(
+    completion_frame, 
+    by = c('Category', 'Whole Question', 'Timescale', 'Completion')
+    ) |>
   mutate(Count = case_when(is.na(Count) ~ 0,
                            TRUE ~ Count)) |>
   arrange(Category, `Whole Question`, Timescale)
@@ -738,195 +840,202 @@ ggplot(expertise,
 ```{r, fig.height = 9, fig.width = 6.5}
 # Median values across respondents
 # with outliers
-ggplot(q1_3, 
-       aes(x = Timescale,
-           y = Estimate,
-           fill = Scenario)) +
-  geom_hline(yintercept = 0,
-             color = 'gray30') +
-  geom_point(aes(y = Estimate,
-                 color = Scenario),
-             position = position_jitterdodge(dodge.width = 0.9,
-                                             jitter.width = 0.7,
-                                             seed = 1),
-             size = 1,
-             alpha = 0.5) +
-  geom_segment(aes(y = Lower,
-                   yend = Upper,
-                   color = Scenario),
-             position = position_jitterdodge(dodge.width = 0.9,
-                                             jitter.width = 0.7,
-                                             seed = 1),
-             width = 0,
-             alpha = 0.5) +
-  geom_violin(color = 'gray10',
-              alpha = 0.25,
-              position = position_dodge(width = 0.9)) +
-  # scale_color_viridis(name = 'Emissions\nPathway',
-  #                     begin = 0.1,
-  #                     end = 0.9,
-  #                     discrete = TRUE,
-  #                     option = 'inferno',
-  #                     direction = -1) +
-  scale_color_manual(name = 'Emissions Pathway',
-                     values = scenario_colors,
-                     guide = guide_legend(ncol = 2)) +
-  scale_fill_manual(name = 'Emissions Pathway',
-                     values = scenario_colors,
-                     guide = guide_legend(ncol = 2)) +
-  geom_linerange(data = q1_3_summary,
-                 aes(xmin = `Dodged Timescale 1` - 0.1, 
-                     xmax = `Dodged Timescale 1` + 0.1,
-                     y = `Estimate Median`,
-                     linewidth = 'Estimate'),
-                 color = 'black') +
-  geom_linerange(data = q1_3_summary,
-                 aes(xmin = `Dodged Timescale 1` - 0.075, 
-                     xmax = `Dodged Timescale 1` + 0.075,
-                     y = `Lower Median`,
-                     linewidth = 'Lower/Upper'),
-                 color = 'black') +
-  geom_linerange(data = q1_3_summary,
-                 aes(xmin = `Dodged Timescale 1` - 0.075, 
-                     xmax = `Dodged Timescale 1` + 0.075,
-                     y = `Upper Median`,
-                     linewidth = 'Lower/Upper'),
-                 color = 'black') +
-  scale_linewidth_manual(
-    name = 'Median Values',
-    values = c(0.7, 0.3),
-    # guide = guide_legend(
-    #   theme = theme(legend.title = element_blank())
-    # )
-  ) +
-  scale_y_continuous(name = expression('Tg C yr'^-1),
-                     transform = "asinh",
-                     breaks = c(-1000, -100, -10, -1, 0, 1, 10, 100, 1000, 10000),
-                     minor_breaks = c(
-                       seq(-4000, -1000, by = 1000),
-                       seq(-900, -100, by = 100),
-                       seq(-90, -10, by = 10),
-                       seq(-9, -1, by = 1),
-                       seq(-0.9, -0.1, by = 0.1),
-                       seq(0.1, 0.9, by = 0.1),
-                       seq(1, 9, by = 1),
-                       seq(10, 90, by = 10),
-                       seq(100, 900, by = 100),
-                       seq(1000, 9000, by = 1000),
-                       seq(10000, 50000, by = 10000)
-                     ),
-                     # labels = function(x) format(x, scientific = TRUE),
-                     # minor_breaks = c(
-                     #   -500, -50, -5, -0.5, 0.5, 5, 50, 500, 5000
-                     #   ),
-                     guide = "axis_logticks") +
-  facet_wrap(~ Category, ncol = 2) +
-  theme(axis.title.x = element_blank(),
-        axis.text.x = element_text(angle = 45, hjust = 1),
-        legend.position = 'inside',
-        legend.position.inside = c(0.75, 0.13),
-        legend.justification = c(0.5, 0.5))
+suppressWarnings(
+  print(
+    ggplot(q1_3, 
+           aes(x = Timescale,
+               y = Estimate,
+               fill = Scenario)) +
+      geom_hline(yintercept = 0,
+                 color = 'gray30') +
+      geom_point(aes(color = Scenario),
+                 position = position_jitterdodge(dodge.width = 0.9,
+                                                 jitter.width = 0.7,
+                                                 seed = 1),
+                 size = 1,
+                 alpha = 0.5) +
+      geom_segment(aes(y = Lower,
+                       yend = Upper,
+                       color = Scenario),
+                   position = position_jitterdodge(dodge.width = 0.9,
+                                                   jitter.width = 0.7,
+                                                   seed = 1),
+                   width = 0,
+                   alpha = 0.5) +
+      geom_violin(color = 'gray10',
+                  alpha = 0.25,
+                  position = position_dodge(width = 0.9)) +
+      # scale_color_viridis(name = 'Emissions\nPathway',
+      #                     begin = 0.1,
+      #                     end = 0.9,
+      #                     discrete = TRUE,
+      #                     option = 'inferno',
+      #                     direction = -1) +
+      scale_color_manual(name = 'Emissions Pathway',
+                         values = scenario_colors,
+                         guide = guide_legend(ncol = 2)) +
+      scale_fill_manual(name = 'Emissions Pathway',
+                        values = scenario_colors,
+                        guide = guide_legend(ncol = 2)) +
+      geom_linerange(data = q1_3_summary,
+                     aes(xmin = `Dodged Timescale 1` - 0.1, 
+                         xmax = `Dodged Timescale 1` + 0.1,
+                         y = `Estimate Median`,
+                         linewidth = 'Estimate'),
+                     color = 'black') +
+      geom_linerange(data = q1_3_summary,
+                     aes(xmin = `Dodged Timescale 1` - 0.075, 
+                         xmax = `Dodged Timescale 1` + 0.075,
+                         y = `Lower Median`,
+                         linewidth = 'Lower/Upper'),
+                     color = 'black') +
+      geom_linerange(data = q1_3_summary,
+                     aes(xmin = `Dodged Timescale 1` - 0.075, 
+                         xmax = `Dodged Timescale 1` + 0.075,
+                         y = `Upper Median`,
+                         linewidth = 'Lower/Upper'),
+                     color = 'black') +
+      scale_linewidth_manual(
+        name = 'Median Values',
+        values = c(0.7, 0.3),
+        # guide = guide_legend(
+        #   theme = theme(legend.title = element_blank())
+        # )
+      ) +
+      scale_y_continuous(name = expression('Tg C yr'^-1),
+                         transform = "asinh",
+                         breaks = c(-1000, -100, -10, -1, 0, 1, 10, 100, 1000, 10000),
+                         minor_breaks = c(
+                           seq(-4000, -1000, by = 1000),
+                           seq(-900, -100, by = 100),
+                           seq(-90, -10, by = 10),
+                           seq(-9, -1, by = 1),
+                           seq(-0.9, -0.1, by = 0.1),
+                           seq(0.1, 0.9, by = 0.1),
+                           seq(1, 9, by = 1),
+                           seq(10, 90, by = 10),
+                           seq(100, 900, by = 100),
+                           seq(1000, 9000, by = 1000),
+                           seq(10000, 50000, by = 10000)
+                         ),
+                         # labels = function(x) format(x, scientific = TRUE),
+                         # minor_breaks = c(
+                         #   -500, -50, -5, -0.5, 0.5, 5, 50, 500, 5000
+                         #   ),
+                         guide = "axis_logticks") +
+      facet_wrap(~ Category, ncol = 2) +
+      theme(axis.title.x = element_blank(),
+            axis.text.x = element_text(angle = 45, hjust = 1),
+            legend.position = 'inside',
+            legend.position.inside = c(0.75, 0.13),
+            legend.justification = c(0.5, 0.5))
+  )
+)
 
 # without outliers
-ggplot(q1_3 |>
-       filter(include == TRUE), 
-       aes(x = Timescale,
-           y = Estimate,
-           fill = Scenario)) +
-  geom_hline(yintercept = 0,
-             color = 'gray30') +
-  geom_point(aes(y = Estimate,
-                 color = Scenario),
-             position = position_jitterdodge(dodge.width = 0.9,
-                                             jitter.width = 0.7,
-                                             seed = 1),
-             size = 1,
-             alpha = 0.5) +
-  geom_segment(aes(y = Lower,
-                   yend = Upper,
-                   color = Scenario),
-             position = position_jitterdodge(dodge.width = 0.9,
-                                             jitter.width = 0.7,
-                                             seed = 1),
-             width = 0,
-             alpha = 0.5) +
-  geom_violin(color = 'gray10',
-              alpha = 0.25,
-              position = position_dodge(width = 0.9)) +
-  # scale_color_viridis(name = 'Emissions\nPathway',
-  #                     begin = 0.1,
-  #                     end = 0.9,
-  #                     discrete = TRUE,
-  #                     option = 'inferno',
-  #                     direction = -1) +
-  scale_color_manual(name = 'Emissions Pathway',
-                     values = scenario_colors,
-                     guide = guide_legend(ncol = 2)) +
-  scale_fill_manual(name = 'Emissions Pathway',
-                     values = scenario_colors,
-                     guide = guide_legend(ncol = 2)) +
-  geom_linerange(data = q1_3_summary,
-                 aes(xmin = `Dodged Timescale 1` - 0.1, 
-                     xmax = `Dodged Timescale 1` + 0.1,
-                     y = `Estimate Median`,
-                     linewidth = 'Estimate'),
-                 color = 'black') +
-  geom_linerange(data = q1_3_summary,
-                 aes(xmin = `Dodged Timescale 1` - 0.075, 
-                     xmax = `Dodged Timescale 1` + 0.075,
-                     y = `Lower Median`,
-                     linewidth = 'Lower/Upper'),
-                 color = 'black') +
-  geom_linerange(data = q1_3_summary,
-                 aes(xmin = `Dodged Timescale 1` - 0.075, 
-                     xmax = `Dodged Timescale 1` + 0.075,
-                     y = `Upper Median`,
-                     linewidth = 'Lower/Upper'),
-                 color = 'black') +
-  scale_linewidth_manual(
-    name = 'Median Values',
-    values = c(0.7, 0.3),
-    # guide = guide_legend(
-    #   theme = theme(legend.title = element_blank())
-    # )
-  ) +
-  scale_y_continuous(name = expression('Tg C yr'^-1),
-                     transform = "asinh",
-                     breaks = c(-1000, -100, -10, -1, 0, 1, 10, 100, 1000, 10000),
-                     minor_breaks = c(
-                       seq(-4000, -1000, by = 1000),
-                       seq(-900, -100, by = 100),
-                       seq(-90, -10, by = 10),
-                       seq(-9, -1, by = 1),
-                       seq(-0.9, -0.1, by = 0.1),
-                       seq(0.1, 0.9, by = 0.1),
-                       seq(1, 9, by = 1),
-                       seq(10, 90, by = 10),
-                       seq(100, 900, by = 100),
-                       seq(1000, 9000, by = 1000),
-                       seq(10000, 50000, by = 10000)
-                     ),
-                     # labels = function(x) format(x, scientific = TRUE),
-                     # minor_breaks = c(
-                     #   -500, -50, -5, -0.5, 0.5, 5, 50, 500, 5000
-                     #   ),
-                     guide = "axis_logticks") +
-  facet_wrap(~ Category, ncol = 2) +
-  theme(axis.title.x = element_blank(),
-        axis.text.x = element_text(angle = 45, hjust = 1),
-        legend.position = 'inside',
-        legend.position.inside = c(0.75, 0.13),
-        legend.justification = c(0.5, 0.5))
+suppressWarnings(
+  print(
+    ggplot(q1_3 |>
+             filter(Remove != 'maybe' | is.na(Remove)), 
+           aes(x = Timescale,
+               y = Estimate,
+               fill = Scenario)) +
+      geom_hline(yintercept = 0,
+                 color = 'gray30') +
+      geom_point(aes(y = Estimate,
+                     color = Scenario),
+                 position = position_jitterdodge(dodge.width = 0.9,
+                                                 jitter.width = 0.7,
+                                                 seed = 1),
+                 size = 1,
+                 alpha = 0.5) +
+      geom_segment(aes(y = Lower,
+                       yend = Upper,
+                       color = Scenario),
+                   position = position_jitterdodge(dodge.width = 0.9,
+                                                   jitter.width = 0.7,
+                                                   seed = 1),
+                   width = 0,
+                   alpha = 0.5) +
+      geom_violin(color = 'gray10',
+                  alpha = 0.25,
+                  position = position_dodge(width = 0.9)) +
+      # scale_color_viridis(name = 'Emissions\nPathway',
+      #                     begin = 0.1,
+      #                     end = 0.9,
+      #                     discrete = TRUE,
+      #                     option = 'inferno',
+      #                     direction = -1) +
+      scale_color_manual(name = 'Emissions Pathway',
+                         values = scenario_colors,
+                         guide = guide_legend(ncol = 2)) +
+      scale_fill_manual(name = 'Emissions Pathway',
+                        values = scenario_colors,
+                        guide = guide_legend(ncol = 2)) +
+      geom_linerange(data = q1_3_summary,
+                     aes(xmin = `Dodged Timescale 1` - 0.1, 
+                         xmax = `Dodged Timescale 1` + 0.1,
+                         y = `Estimate Median`,
+                         linewidth = 'Estimate'),
+                     color = 'black') +
+      geom_linerange(data = q1_3_summary,
+                     aes(xmin = `Dodged Timescale 1` - 0.075, 
+                         xmax = `Dodged Timescale 1` + 0.075,
+                         y = `Lower Median`,
+                         linewidth = 'Lower/Upper'),
+                     color = 'black') +
+      geom_linerange(data = q1_3_summary,
+                     aes(xmin = `Dodged Timescale 1` - 0.075, 
+                         xmax = `Dodged Timescale 1` + 0.075,
+                         y = `Upper Median`,
+                         linewidth = 'Lower/Upper'),
+                     color = 'black') +
+      scale_linewidth_manual(
+        name = 'Median Values',
+        values = c(0.7, 0.3),
+        # guide = guide_legend(
+        #   theme = theme(legend.title = element_blank())
+        # )
+      ) +
+      scale_y_continuous(name = expression('Tg C yr'^-1),
+                         transform = "asinh",
+                         breaks = c(-1000, -100, -10, -1, 0, 1, 10, 100, 1000, 10000),
+                         minor_breaks = c(
+                           seq(-4000, -1000, by = 1000),
+                           seq(-900, -100, by = 100),
+                           seq(-90, -10, by = 10),
+                           seq(-9, -1, by = 1),
+                           seq(-0.9, -0.1, by = 0.1),
+                           seq(0.1, 0.9, by = 0.1),
+                           seq(1, 9, by = 1),
+                           seq(10, 90, by = 10),
+                           seq(100, 900, by = 100),
+                           seq(1000, 9000, by = 1000),
+                           seq(10000, 50000, by = 10000)
+                         ),
+                         # labels = function(x) format(x, scientific = TRUE),
+                         # minor_breaks = c(
+                         #   -500, -50, -5, -0.5, 0.5, 5, 50, 500, 5000
+                         #   ),
+                         guide = "axis_logticks") +
+      facet_wrap(~ Category, ncol = 2) +
+      theme(axis.title.x = element_blank(),
+            axis.text.x = element_text(angle = 45, hjust = 1),
+            legend.position = 'inside',
+            legend.position.inside = c(0.75, 0.13),
+            legend.justification = c(0.5, 0.5))
+  )
+)
 
-# ggsave('./figures/q1_3_violin.pdf',
+# ggsave('./figures/q1_3_violin_no_outliers.pdf',
 #        height = 6.5, width = 6.5)
-# ggsave('./figures/q1_3_violin.jpg',
+# ggsave('./figures/q1_3_violin_no_outliers.jpg',
 #        height = 6.5, width = 6.5)
 ```
 
 ```{r, fig.height = 6.5, fig.width = 6.5}
 ggplot(q1_3 |>
-       filter(include == TRUE), 
+       filter(Remove != 'maybe' | is.na(Remove)), 
        aes(x = Category,
            y = Estimate,
            fill = Scenario)) +
@@ -1019,44 +1128,10 @@ ggplot(q1_3 |>
   #       legend.position.inside = c(0.75, 0.13),
   #       legend.justification = c(0.5, 0.5))
 
-# ggsave('./figures/q1_3_violin_categories.pdf',
+# ggsave('./figures/q1_3_violin_categories_no_outliers.pdf',
 #        height = 6.5, width = 6.5)
-# ggsave('./figures/q1_3_violin_categories.jpg',
+# ggsave('./figures/q1_3_violin_categories_no_outliers.jpg',
 #        height = 6.5, width = 6.5)
-```
-
-### Histograms
-
-```{r}
-# Lower
-ggplot(q1_3, 
-       aes(x = Lower,
-           color = Scenario)) +
-  geom_density() +
-  scale_color_manual(name = 'Emissions\nPathway',
-                     values = scenario_colors) +
-  facet_grid(Question ~ Category, scales = 'free') +
-  ggtitle('Lower')
-
-# Upper
-ggplot(q1_3, 
-       aes(x = Upper,
-           color = Scenario)) +
-  geom_density() +
-  scale_color_manual(name = 'Emissions\nPathway',
-                     values = scenario_colors) +
-  facet_grid(Timescale ~ Category, scales = 'free') +
-  ggtitle('Upper')
-
-# even chance
-ggplot(q1_3, 
-       aes(x = Estimate,
-           color = Scenario)) +
-  geom_density() +
-  scale_color_manual(name = 'Emissions\nPathway',
-                     values = scenario_colors) +
-  facet_grid(Timescale ~ Category, scales = 'free') +
-  ggtitle('Even Chance')
 ```
 
 By Expertise
@@ -1238,7 +1313,7 @@ ggplot(q1_3 |>
     values = c('solid', 'dashed'),
     guide = guide_legend(title = element_blank())
   ) +
-  scale_x_continuous(limits = c(0, 5)) +
+  scale_x_continuous(limits = c(0.5, 5.5)) +
   scale_y_continuous(name = 'Number of Respondents',
                      breaks = seq(0, 10, by = 2)) +
   facet_grid(Category ~ .)
@@ -1272,7 +1347,7 @@ ggplot(
     values = c('solid', 'dashed'),
     guide = guide_legend(title = element_blank())
   ) +
-  scale_x_continuous(limits = c(0, 5)) +
+  scale_x_continuous(limits = c(0.5, 5.5)) +
   scale_y_continuous(name = 'Number of Respondents',
                      breaks = seq(0, 10, by = 2)) +
   facet_grid(Category ~ Scenario)
@@ -1288,7 +1363,7 @@ ggplot(
 ```{r, fig.height = 6.5, fig.width = 6.5}
 ggplot(
   q1_3 |>
-         filter(Question == '3b')
+    filter(Question == '3b')
 ) +
   geom_bar(aes(x = Confidence),
            position = position_dodge()) +
@@ -1304,6 +1379,7 @@ ggplot(
     values = c('solid', 'dashed'),
     guide = guide_legend(title = element_blank())
   ) +
+  scale_x_continuous(limits = c(0.5, 5.5)) +
   scale_y_continuous(name = 'Number of Respondents',
                      breaks = seq(0, 10, by = 2)) +
   facet_grid(Category ~ Scenario)
@@ -1322,6 +1398,7 @@ ggplot(
 ### Box Plot
 
 ```{r, fig.height = 6.5, fig.width = 6.5}
+# with outliers
 ggplot(q2_long, 
        aes(x = Timescale, 
            y = `Disturbance Change`, 
@@ -1345,10 +1422,34 @@ ggplot(q2_long,
                                 '>= 50')) +
   facet_grid(Category ~ Variable)
   
-# ggsave('./figures/q2_overview.pdf',
+# without outliers
+ggplot(q2_long_clean, 
+       aes(x = Timescale, 
+           y = `Disturbance Change`, 
+           fill = Scenario)) +
+  geom_hline(yintercept = 0,
+             color = 'gray30') +
+  geom_boxplot(position = position_dodge(width = 0.75),
+               color = 'black',
+               linewidth = 0.25,
+               outlier.size = 0.5) +
+  scale_fill_manual(name = 'Emissions\nPathway',
+                     values = scenario_colors[-1]) +
+  scale_y_continuous(name = 'Change in Disturbance (%)',
+                     breaks = seq(-3, 3),
+                     labels = c('<= -50',
+                                '-20 - -50',
+                                '-5 - -20',
+                                '-5 - 5',
+                                '5 - 20',
+                                '20 - 50',
+                                '>= 50')) +
+  facet_grid(Category ~ Variable)
+  
+# ggsave('./figures/q2_overview_no_outliers.pdf',
 #        height = 6.5,
 #        width = 6.5)
-# ggsave('./figures/q2_overview.jpg',
+# ggsave('./figures/q2_overview_no_outliers.jpg',
 #        height = 6.5,
 #        width = 6.5)
 ```
@@ -1356,6 +1457,7 @@ ggplot(q2_long,
 ### Q2 Confidence
 
 ```{r, fig.height = 6.5, fig.width = 6.5}
+# with outliers
 ggplot(
   q2 |>
     filter(Question == '2a')
@@ -1374,7 +1476,7 @@ ggplot(
     values = c('solid', 'dashed'),
     guide = guide_legend(title = element_blank())
   ) +
-  scale_x_continuous(limits = c(0, 5)) +
+  scale_x_continuous(limits = c(0.5, 5.5)) +
   scale_y_continuous(name = 'Number of Respondents') +
   facet_grid(Category ~ Scenario)
 
@@ -1514,3 +1616,128 @@ ggplot(q4_notes
 #        height = 6.5, 
 #        width = 4)
 ```
+
+
+## Demographic Information
+
+Gender
+
+```{r, fig.height = 4, fig.width = 6.5}
+gender_count = demographics |>
+  summarise(Count = n(),
+            .by = c(Gender, Category)) |>
+  rbind(demographics |>
+          summarise(Count = n(),
+                    .by = Gender) |>
+          mutate(
+            Category = factor('Total',
+                              levels = c('Anthropogenic',
+                                         'Biotic',
+                                         'Fire',
+                                         'Permafrost',
+                                         'Weather',
+                                         'Total')))
+  )
+
+ggplot(gender_count,
+       aes(x = Gender, y = Count, fill = Category == 'Total')) +
+  geom_col() +
+  scale_fill_manual(values = c('gray30', 'black')) +
+  facet_wrap(~ Category) +
+  theme(legend.position = 'none',
+        axis.text.x = element_text(angle = 45,
+                                   vjust = 1,
+                                   hjust = 1))
+
+# ggsave('./figures/gender.pdf',
+#        height = 4, 
+#        width = 6.5)
+# ggsave('./figures/gender.jpg',
+#        height = 4, 
+#        width = 6.5)
+```
+
+Career Stage
+
+For those people who put themselves in a between category, I rounded up, such that someone who said they were Early/Mid career got classified as Mid career.
+
+```{r, fig.height = 4, fig.width = 6.5}
+stage_count = demographics |>
+  summarise(Count = n(),
+            .by = c(`Career Stage`, Category)) |>
+  rbind(demographics |>
+          summarise(Count = n(),
+                    .by = `Career Stage`) |>
+          mutate(
+            Category = factor('Total',
+                              levels = c('Anthropogenic',
+                                         'Biotic',
+                                         'Fire',
+                                         'Permafrost',
+                                         'Weather',
+                                         'Total')))
+  )
+
+ggplot(stage_count,
+       aes(x = `Career Stage`, y = Count, fill = Category == 'Total')) +
+  geom_col() +
+  scale_fill_manual(values = c('gray30', 'black')) +
+  facet_wrap(~ Category) +
+  theme(legend.position = 'none',
+        axis.text.x = element_text(angle = 45,
+                                   vjust = 1,
+                                   hjust = 1))
+
+# ggsave('./figures/career_stage.pdf',
+#        height = 4, 
+#        width = 6.5)
+# ggsave('./figures/career_stage.jpg',
+#        height = 4, 
+#        width = 6.5)
+```
+
+Country
+
+```{r, fig.height = 6.5, fig.width = 6.5}
+country_count = demographics %>%
+  summarise(Count = n(),
+            .by = c(Country, Category)) %>%
+  rbind(demographics %>%
+          summarise(Count = n(),
+                    .by = Country) %>%
+          mutate(
+            Category = factor('Total',
+                              levels = c('Anthropogenic',
+                                         'Biotic',
+                                         'Fire',
+                                         'Permafrost',
+                                         'Weather',
+                                         'Total')))
+  ) %>%
+  arrange(desc(Category), desc(Count), Country) %>%
+  mutate(Country = factor(Country, levels = c(unique(.$Country)[which(unique(.$Country) != 'Not Provided')], 'Not Provided')))
+
+ggplot(country_count,
+       aes(x = Country, y = Count, fill = Category == 'Total')) +
+  geom_col() +
+  scale_fill_manual(values = c('gray30', 'black')) +
+  facet_wrap(~ Category, ncol = 2) +
+  theme(legend.position = 'none',
+        axis.text.x = element_text(angle = 45,
+                                   vjust = 1,
+                                   hjust = 1))
+
+# ggsave('./figures/country.pdf',
+#        height = 6.5, 
+#        width = 6.5)
+# ggsave('./figures/country.jpg',
+#        height = 6.5, 
+#        width = 6.5)
+```
+
+Expertise by Gender
+
+```{r}
+
+```
+
