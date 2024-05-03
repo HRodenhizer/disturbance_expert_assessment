@@ -610,6 +610,35 @@ q4_notes_summary = q4_notes |>
     .by = c(Category))
 ```
 
+## Q5
+
+```{r}
+q5 = read_excel('data/Q5_not_done_optional.xlsx') |>
+  rowwise() |>
+  mutate(
+    `Disturbance Types` = case_when(
+      !is.na(`Interacting Disturbance`) ~ str_flatten(
+        sort(c(as.character(Category), 
+                as.character(`Interacting Disturbance`))), 
+        collapse = '/'
+      ),
+      TRUE ~ NA
+    )
+  ) |>
+  ungroup()
+
+q5 |>
+  summarise(count = n(),
+            .by = c(`Disturbance Types`)) |>
+  arrange(count)
+
+q5 |>
+  filter(is.na(Notes)) |>
+  summarise(count = n(),
+            .by = c(`Disturbance Types`)) |>
+  arrange(count)
+```
+
 ## Demographic Information
 
 ```{r}
