@@ -613,9 +613,23 @@ q4_notes_summary = q4_notes |>
 ## Demographic Information
 
 ```{r}
+mean_from_string = function(string, delim) {
+  if(!is.na(string)) {
+    new_value = string |>
+      str_split_1(delim) |>
+      as.numeric() |>
+      mean(na.rm = TRUE)
+  } else {
+    new_value = NA_real_
+  }
+  
+  return(new_value)
+} 
+
 demographics = read_excel('data/Demographic Information.xlsx') |>
   mutate(
-    across(Gender:`Previous Expert Assessment`, ~ replace_na(.x, 'Not Provided')),
+    across(Gender:`Previous Expert Assessment`, 
+           ~ replace_na(.x, 'Not Provided')),
     Category = factor(
       Category,
       levels = c(
@@ -643,7 +657,67 @@ demographics = read_excel('data/Demographic Information.xlsx') |>
     ),
     Country = case_when(str_detect(Country, 'Switzerland') ~ 'Switzerland',
                         TRUE ~ Country)
+  ) |>
+  rowwise() |>
+  mutate(across(
+    `Field Work`:Other, 
+    ~ case_when(
+      str_detect(.x, '<|>') ~ as.numeric(str_extract(.x, '\\d+')),
+      str_detect(.x, '-') ~ mean_from_string(.x, '-'),
+      TRUE ~ as.numeric(.x)
+    )
+  ),
+  ) |>
+  ungroup()
+```
+
+```{r}
+demographics_long = demographics |>
+  pivot_longer(`Field Work`:Other,
+               names_to = 'Task',
+               values_to = 'Time') |>
+  mutate(Task = factor(Task,
+                       levels = c('Field Work',
+                                  'Modelling',
+                                  'Remote Sensing',
+                                  'Other')),
+         `Other Type` = case_when(Task == 'Other' ~ `Other Type`,
+                                  TRUE ~ NA)) 
+```
+
+```{r}
+demographics_summary = demographics_long |>
+  summarise(`Time Mean` = mean(Time, na.rm = TRUE),
+            `Time SD` = sd(Time, na.rm = TRUE),
+            .by = c(Task, Category))
+
+demographics_summary = demographics_summary |>
+  rbind(
+    demographics_long |>
+      summarise(`Time Mean` = mean(Time, na.rm = TRUE),
+                `Time SD` = sd(Time, na.rm = TRUE),
+                .by = c(Task)) |>
+      mutate(Category = factor('All Categories',
+                               levels = c('Anthropogenic',
+                                          'Biotic',
+                                          'Fire',
+                                          'Permafrost',
+                                          'Weather',
+                                          'All Categories')))
   )
+```
+
+```{r}
+demographics_long = demographics_long |>
+  rbind(demographics_long |>
+          mutate(Category = factor('All Categories',
+                                   levels = c('Anthropogenic',
+                                              'Biotic',
+                                              'Fire',
+                                              'Permafrost',
+                                              'Weather',
+                                              'All Categories')))
+        )
 ```
 
 
@@ -1620,7 +1694,7 @@ ggplot(q4_notes
 
 ## Demographic Information
 
-Gender
+### Gender
 
 ```{r, fig.height = 4, fig.width = 6.5}
 gender_count = demographics |>
@@ -1630,17 +1704,17 @@ gender_count = demographics |>
           summarise(Count = n(),
                     .by = Gender) |>
           mutate(
-            Category = factor('Total',
+            Category = factor('All Categories',
                               levels = c('Anthropogenic',
                                          'Biotic',
                                          'Fire',
                                          'Permafrost',
                                          'Weather',
-                                         'Total')))
+                                         'All Categories')))
   )
 
 ggplot(gender_count,
-       aes(x = Gender, y = Count, fill = Category == 'Total')) +
+       aes(x = Gender, y = Count, fill = Category == 'All Categories')) +
   geom_col() +
   scale_fill_manual(values = c('gray30', 'black')) +
   facet_wrap(~ Category) +
@@ -1657,7 +1731,7 @@ ggplot(gender_count,
 #        width = 6.5)
 ```
 
-Career Stage
+### Career Stage
 
 For those people who put themselves in a between category, I rounded up, such that someone who said they were Early/Mid career got classified as Mid career.
 
@@ -1669,17 +1743,17 @@ stage_count = demographics |>
           summarise(Count = n(),
                     .by = `Career Stage`) |>
           mutate(
-            Category = factor('Total',
+            Category = factor('All Categories',
                               levels = c('Anthropogenic',
                                          'Biotic',
                                          'Fire',
                                          'Permafrost',
                                          'Weather',
-                                         'Total')))
+                                         'All Categories')))
   )
 
 ggplot(stage_count,
-       aes(x = `Career Stage`, y = Count, fill = Category == 'Total')) +
+       aes(x = `Career Stage`, y = Count, fill = Category == 'All Categories')) +
   geom_col() +
   scale_fill_manual(values = c('gray30', 'black')) +
   facet_wrap(~ Category) +
@@ -1696,7 +1770,7 @@ ggplot(stage_count,
 #        width = 6.5)
 ```
 
-Country
+### Country
 
 ```{r, fig.height = 6.5, fig.width = 6.5}
 country_count = demographics %>%
@@ -1706,19 +1780,19 @@ country_count = demographics %>%
           summarise(Count = n(),
                     .by = Country) %>%
           mutate(
-            Category = factor('Total',
+            Category = factor('All Categories',
                               levels = c('Anthropogenic',
                                          'Biotic',
                                          'Fire',
                                          'Permafrost',
                                          'Weather',
-                                         'Total')))
+                                         'All Categories')))
   ) %>%
   arrange(desc(Category), desc(Count), Country) %>%
   mutate(Country = factor(Country, levels = c(unique(.$Country)[which(unique(.$Country) != 'Not Provided')], 'Not Provided')))
 
 ggplot(country_count,
-       aes(x = Country, y = Count, fill = Category == 'Total')) +
+       aes(x = Country, y = Count, fill = Category == 'All Categories')) +
   geom_col() +
   scale_fill_manual(values = c('gray30', 'black')) +
   facet_wrap(~ Category, ncol = 2) +
@@ -1735,9 +1809,199 @@ ggplot(country_count,
 #        width = 6.5)
 ```
 
-Expertise by Gender
+### Work Tasks
+
+```{r, fig.height = 5, fig.width = 6.5}
+ggplot(demographics_long,
+       aes(x = Task, y = Time)) +
+  geom_point(alpha = 0.5) +
+  geom_point(data = demographics_summary,
+             aes(x = Task, y = `Time Mean`),
+             inherit.aes = FALSE,
+             size = 3) +
+  geom_errorbar(data = demographics_summary,
+             aes(x = Task, 
+                 ymin = `Time Mean` - `Time SD`,
+                 ymax = `Time Mean` + `Time SD`),
+             inherit.aes = FALSE,
+             width = 0.2) +
+  facet_wrap(~ Category) +
+  theme(axis.text.x = element_text(angle = 45,
+                                   hjust = 1,
+                                   vjust = 1))
+
+# ggsave('./figures/tasks.pdf',
+#        height = 5, 
+#        width = 6.5)
+# ggsave('./figures/tasks.jpg',
+#        height = 5, 
+#        width = 6.5)
+```
+
+### Expertise (self-reported) by Demographics
 
 ```{r}
+expertise = q1_3 |>
+  summarise(Expertise = first(Expertise),
+            .by = c(Respondent, Category, Question)) |>
+  rbind(
+    q2 |>
+      summarise(Expertise = first(Expertise),
+                .by = c(Respondent, Category, Question))
+  ) |>
+  summarise(Expertise = mean(Expertise, na.rm = TRUE),
+            .by = c(Respondent, Category)) |>
+  full_join(demographics,
+            by = c('Respondent', 'Category'))
 
+expertise_summary = expertise |>
+  summarise(`Expertise Mean` = mean(Expertise, na.rm = TRUE),
+            `Expertise SD` = sd(Expertise, na.rm = TRUE),
+            .by = c(Gender, `Career Stage`, Category)) |>
+  rbind(
+    expertise |>
+      summarise(`Expertise Mean` = mean(Expertise, na.rm = TRUE),
+                `Expertise SD` = sd(Expertise, na.rm = TRUE),
+                .by = c(Gender, `Career Stage`)) |>
+      mutate(Category = factor('All Categories',
+                               levels = c('Anthropogenic',
+                                          'Biotic',
+                                          'Fire',
+                                          'Permafrost',
+                                          'Weather',
+                                          'All Categories')))
+  )
+
+expertise_gender_summary = expertise |>
+  summarise(`Expertise Mean` = mean(Expertise, na.rm = TRUE),
+            `Expertise SD` = sd(Expertise, na.rm = TRUE),
+            .by = c(Gender, Category)) |>
+  rbind(
+    expertise |>
+      summarise(`Expertise Mean` = mean(Expertise, na.rm = TRUE),
+                `Expertise SD` = sd(Expertise, na.rm = TRUE),
+                .by = c(Gender)) |>
+      mutate(Category = factor('All Categories',
+                               levels = c('Anthropogenic',
+                                          'Biotic',
+                                          'Fire',
+                                          'Permafrost',
+                                          'Weather',
+                                          'All Categories')))
+  )
+
+expertise_career_summary = expertise |>
+  summarise(`Expertise Mean` = mean(Expertise, na.rm = TRUE),
+            `Expertise SD` = sd(Expertise, na.rm = TRUE),
+            .by = c(`Career Stage`, Category)) |>
+  rbind(
+    expertise |>
+      summarise(`Expertise Mean` = mean(Expertise, na.rm = TRUE),
+                `Expertise SD` = sd(Expertise, na.rm = TRUE),
+                .by = c(`Career Stage`)) |>
+      mutate(Category = factor('All Categories',
+                               levels = c('Anthropogenic',
+                                          'Biotic',
+                                          'Fire',
+                                          'Permafrost',
+                                          'Weather',
+                                          'All Categories')))
+  )
+
+expertise = expertise |>
+  rbind(expertise |>
+          mutate(Category = factor('All Categories',
+                                   levels = c('Anthropogenic',
+                                              'Biotic',
+                                              'Fire',
+                                              'Permafrost',
+                                              'Weather',
+                                              'All Categories'))))
+```
+
+Gender/Career Stage
+
+```{r}
+expertise_lm_4 = lm(Expertise ~ Gender*`Career Stage`,
+   data = expertise)
+summary(expertise_lm_4)
+
+expertise_lm_3 = lm(Expertise ~ Gender+`Career Stage`,
+   data = expertise)
+summary(expertise_lm_3)
+
+expertise_lm_2 = lm(Expertise ~ Gender,
+   data = expertise)
+summary(expertise_lm_2)
+
+expertise_lm_1 = lm(Expertise ~ `Career Stage`,
+   data = expertise)
+summary(expertise_lm_1)
+
+expertise_lm_0 = lm(Expertise ~ 1,
+   data = expertise)
+summary(expertise_lm_0)
+
+AIC(expertise_lm_4, expertise_lm_3, expertise_lm_2, expertise_lm_1, expertise_lm_0)
+```
+
+```{r, fig.height = 4, fig.width = 6.5}
+ggplot(expertise,
+       aes(x = Gender, y = Expertise, color = `Career Stage`)) +
+  geom_point(alpha = 0.5) +
+  geom_point(data = expertise_gender_summary,
+             aes(x = Gender, y = `Expertise Mean`),
+             inherit.aes = FALSE,
+             size = 3) +
+  geom_errorbar(data = expertise_gender_summary,
+                aes(x = Gender, 
+                    ymin = `Expertise Mean` - `Expertise SD`,
+                    ymax = `Expertise Mean` + `Expertise SD`),
+                inherit.aes = FALSE,
+                width = 0.1) +
+  scale_color_viridis(discrete = TRUE) +
+  facet_wrap(~ Category) +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1))
+
+# ggsave('./figures/expertise_gender.pdf',
+#        height = 4, 
+#        width = 6.5)
+# ggsave('./figures/expertise_gender.jpg',
+#        height = 4, 
+#        width = 6.5)
+
+ggplot(expertise,
+       aes(x = `Career Stage`, y = Expertise, color = Gender)) +
+  geom_point(alpha = 0.5) +
+  geom_point(data = expertise_career_summary,
+             aes(x = `Career Stage`, y = `Expertise Mean`),
+             inherit.aes = FALSE,
+             size = 3) +
+  geom_errorbar(data = expertise_career_summary,
+                aes(x = `Career Stage`, 
+                    ymin = `Expertise Mean` - `Expertise SD`,
+                    ymax = `Expertise Mean` + `Expertise SD`),
+                inherit.aes = FALSE,
+                width = 0.1) +
+  scale_color_viridis(discrete = TRUE) +
+  facet_wrap(~ Category) +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1))
+
+ggplot(expertise,
+       aes(x = Gender, y = Expertise, color = `Career Stage`)) +
+  geom_point(alpha = 0.5) +
+  geom_point(data = expertise_summary,
+             aes(x = Gender, y = `Expertise Mean`),
+             inherit.aes = FALSE,
+             size = 3) +
+  geom_errorbar(data = expertise_summary,
+                aes(x = Gender, 
+                    ymin = `Expertise Mean` - `Expertise SD`,
+                    ymax = `Expertise Mean` + `Expertise SD`),
+                inherit.aes = FALSE,
+                width = 0.1) +
+  scale_color_viridis(discrete = TRUE) +
+  facet_grid(Category ~ `Career Stage`) +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1))
 ```
 
