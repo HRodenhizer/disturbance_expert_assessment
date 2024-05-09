@@ -649,14 +649,13 @@ q5_fp_summary = q5_fp |>
              TRUE ~ .x)
     ),
     ranking = case_when(
-      is.na(ranking) ~ 0,
-      TRUE ~ ranking)
+      is.na(ranking) ~ 1,
+      ranking == 3 ~ 2,
+      ranking == 2 ~ 3,
+      ranking == 1 ~ 4)
   ) |>
   summarise(
-    ranking = case_when(
-      all(ranking == 0) ~ NA_real_,
-      TRUE ~ mean(ranking)
-    ), # normalizing for the number of times that path showed up in peoples' diagrams
+    ranking = sum(c(ranking, rep(0, 6-n()))),
     relationship = case_when(
       all(is.na(relationship)) ~ NA_character_,
       all(relationship == '-', na.rm = TRUE) ~ '-',
@@ -673,10 +672,10 @@ q5_fp_summary = q5_fp |>
   ) |>
   mutate(
     label = case_when(
-      is.na(ranking) ~ relationship,
+      is.na(relationship) ~ paste0('(', count, ')'),
       TRUE ~ paste0(relationship, 
                     ' (', 
-                    round(ranking, 1), 
+                    count, 
                     ')')
     )
   )
@@ -1773,7 +1772,7 @@ nodes_fp = create_node_df(
   y = c(4, 4, 6.5, 4.9, 4, 4, 5.3, 5.9, 2.5, 3.3, 2.7, 2, 2.5, 6, 5.63, 5.3, 6, 3.5),
   style = c('filled', rep('rounded', 4), 'filled', rep('rounded', 12)),
   color = 'gray50',
-  fillcolor = c('gray50', rep('white', 4), 'gray50', rep('white', 12)),
+  fillcolor = c('gray70', rep('white', 4), 'gray70', rep('white', 12)),
   shape = c('rectangle', rep('rectangle', 4), 'rectangle', rep('rectangle', 12)),
   fontcolor = 'black',
   height = 0.1,
@@ -1797,22 +1796,31 @@ edges_fp = create_edge_df(
   fontsize = 10,
   # color = gray(((q5_fp_summary$count/(max(q5_fp_summary$count)*2)+0.25)*-1)+1),
   color = 'gray50',
-  penwidth = q5_fp_summary$count,
+  penwidth = q5_fp_summary$ranking/1.5,
   style = q5_fp_summary$causation
 )
 edges_fp
 
 fp = create_graph()
-fp_1 = fp %>%
+fp = fp %>%
   add_nodes_from_table(table = nodes_fp,
-                       label_col = label)
-fp_2 = fp_1 %>%
+                       label_col = label) %>%
   add_edges_from_table(table = edges_fp,
                        from_col = from,
                        to_col = to,
                        from_to_map = id_external)
 
-render_graph(fp_2)
+render_graph(fp)
+# save_graph(fp,
+#            './figures/fire_permafrost_network')
+# export_graph(fp,
+#              './figures/fire_permafrost_network_diagram.pdf',
+#              height = 4,
+#              width = 6.5)
+# export_graph(fp,
+#              './figures/fire_permafrost_network_diagram.png',
+#              height = 1062,
+#              width = 1950)
 ```
 
 ## Demographic Information
