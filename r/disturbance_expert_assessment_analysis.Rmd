@@ -13,7 +13,6 @@ library(viridis)
 library(RColorBrewer)
 library(readxl)
 library(ggridges)
-# library(ggflowchart)
 library(DiagrammeR)
 library(tidyverse)
 ```
@@ -616,7 +615,7 @@ q4_notes_summary = q4_notes |>
 ## Q5
 
 ```{r}
-q5 = read_excel('data/Q5_not_done_optional.xlsx') |>
+q5 = read_excel('data/Q5.xlsx') |>
   rowwise() |>
   mutate(
     `Disturbance Types` = case_when(
@@ -641,7 +640,7 @@ q5 |>
             .by = c(`Disturbance Types`)) |>
   arrange(count)
 
-q5_fp = read_excel('data/Q5_not_done_optional.xlsx', sheet = 2)
+q5_fp = read_excel('data/Q5.xlsx', sheet = 2)
 
 q5_fp_summary = q5_fp |>
   mutate(
@@ -673,16 +672,38 @@ q5_fp_summary = q5_fp |>
     .by = c('from', 'to')
   )
 
-# q5_fp_summary_filter = q5_fp_summary |>
-#   filter(!is.na(relationship) & from != 'CO2 Emissions' & to != 'CO2 Emissions')
-# 
-# q5_filter_indices = semi_join(
-#   q5_fp_summary |>
-#     mutate(idx = row_number()),
-#   q5_fp_summary_filter,
-#   by = colnames(q5_fp_summary_filter)
-# ) |>
-#   pull(idx)
+q5_fw = read_excel('data/Q5.xlsx', sheet = 3)
+
+q5_fw_summary = q5_fw |>
+  mutate(
+    across(from:to,
+           ~ case_when(
+             .x == 'Winter Soil Temperature' ~ 'Winter Soil\nTemperature',
+             .x == 'Summer Soil Temperature' ~ 'Summer Soil\nTemperature',
+             TRUE ~ .x)
+    ),
+    ranking = case_when(
+      is.na(ranking) ~ 1,
+      ranking == 3 ~ 2,
+      ranking == 2 ~ 3,
+      ranking == 1 ~ 4)
+  ) |>
+  summarise(
+    ranking = sum(c(ranking, rep(0, 6-n()))),
+    relationship = case_when(
+      all(is.na(relationship)) ~ NA_character_,
+      all(relationship == '-', na.rm = TRUE) ~ '-',
+      all(relationship == '+', na.rm = TRUE) ~ '+',
+      TRUE ~ '+/-'
+    ),
+    causation = case_when(
+      all(causation == 'yes', na.rm = TRUE) ~ 'solid',
+      all(causation == 'no', na.rm = TRUE) ~ 'dotted',
+      TRUE ~ 'solid'
+    ),
+    count = n(),
+    .by = c('from', 'to')
+  )
 ```
 
 ## Demographic Information
@@ -1913,47 +1934,69 @@ render_graph(fp)
 ```
 
 ```{r}
-# nodes = unique(c(q5_fp_summary$from, 
-#                  q5_fp_summary$to))
-# nodes_fp = tibble(
-#   id = 1:length(nodes),
-#   name = nodes,
-#   x = c(0, 2.5, 3.7, 3.5, 5.7, 8, 1.1, 2, 5.2, 2, 3.8, 4, 1.5, 0.7, 3.07, 5.3, 5.75, 3.6),
-#   y = c(4, 4, 6.5, 4.9, 4, 4, 5.3, 5.9, 2.5, 3.3, 2.7, 2, 2.5, 6, 5.63, 5.3, 6, 3.5),
-#   style = c('filled', rep('rounded', 4), 'filled', rep('rounded', 12)),
-#   color = 'gray50',
-#   fillcolor = c('gray70', rep('white', 4), 'gray70', rep('white', 12)),
-#   shape = c('rectangle', rep('rectangle', 4), 'rectangle', rep('rectangle', 12)),
-#   fontcolor = 'black',
-#   height = 0.1,
-#   width = 0.3,
-#   fixedsize = FALSE
-# )
-# nodes_fp
-# 
-# nodes_fp_filter = nodes_fp |>
-#   filter(!name %in% c('Precipitation', 'Short-Lived Climate Forcers'))
-# 
-# edges_fp = tibble(
-#   from = q5_fp_summary$from,
-#   to = q5_fp_summary$to,
-#   label = q5_fp_summary$label,
-#   fontsize = 10,
-#   # color = gray(((q5_fp_summary$count/(max(q5_fp_summary$count)*2)+0.25)*-1)+1),
-#   # color = 'gray50',
-#   color = case_when(q5_fp_summary$relationship == '-' ~ '#6699CC',
-#                     q5_fp_summary$relationship == '+/-' ~ 'gray50',
-#                     q5_fp_summary$relationship == '+' ~ '#CC6666',
-#                     TRUE ~ 'gray50'),
-#   penwidth = q5_fp_summary$ranking/1.5,
-#   style = q5_fp_summary$causation
-# )
-# edges_fp
-# 
-# edges_fp_filter = edges_fp |>
-#   filter(style != 'dotted')
-# 
-# ggflowchart(edges_fp_filter, node_data = nodes_fp_filter, layout = 'custom')
+nodes = unique(c(q5_fw_summary$from, 
+                 q5_fw_summary$to))
+nodes_fw = create_node_df(
+  n = length(nodes),
+  label = nodes,
+  x = c(0, 1.5, 1, 4, 6, 6, 4.3, 2.6, 0.8, 6, 6, 3, 5, 2, 6, 1,
+        7, 8, 3, 1.8, 3.5, 2),
+  y = c(4, 7, 3, 1.5, 3.2, 4, 2.9, 2.9, 5, 7, 5.5, 1, 1, 0.5, 0.5, 0,
+        0, 4, 3.75, 3.7, 4.25, 4.7),
+  style = c('filled', rep('rounded', 16), 'filled', rep('rounded', 4)),
+  color = 'gray50',
+  fillcolor = c('gray70', rep('white', 16), 'gray70', rep('white', 4)),
+  shape = 'rectangle',
+  fontcolor = 'black',
+  height = 0.1,
+  width = 0.3,
+  fixedsize = FALSE
+)
+nodes_fw
+
+edges_fw = create_edge_df(
+  from = q5_fw_summary|>
+    select(from) |>
+    rename(label = from) |>
+    left_join(nodes_fw, by = 'label') |>
+    pull(id),
+  to = q5_fw_summary|>
+    select(to) |>
+    rename(label = to) |>
+    left_join(nodes_fw, by = 'label') |>
+    pull(id),
+  # label = q5_fw_summary$count,
+  fontsize = 10,
+  # color = gray(((q5_fw_summary$count/(max(q5_fw_summary$count)*2)+0.25)*-1)+1),
+  # color = 'gray50',
+  color = case_when(q5_fw_summary$relationship == '+' ~ '#6699CC',
+                    q5_fw_summary$relationship == '+/-' ~ 'gray50',
+                    q5_fw_summary$relationship == '-' ~ '#CC6666'),
+  penwidth = q5_fw_summary$ranking/1.5,
+  style = q5_fw_summary$causation
+)
+edges_fw
+
+fw = create_graph()
+fw = fw %>%
+  add_nodes_from_table(table = nodes_fw,
+                       label_col = label) %>%
+  add_edges_from_table(table = edges_fw,
+                       from_col = from,
+                       to_col = to,
+                       from_to_map = id_external)
+
+render_graph(fw)
+# save_graph(fw,
+#            './figures/q5_fire_weather_network_color')
+# export_graph(fw,
+#              './figures/q5_fire_weather_network_diagram_color.pdf',
+#              height = 4,
+#              width = 6.5)
+# export_graph(fw,
+#              './figures/q5_fire_weather_network_diagram_color.png',
+#              height = 1062,
+#              width = 1950)
 ```
 
 
