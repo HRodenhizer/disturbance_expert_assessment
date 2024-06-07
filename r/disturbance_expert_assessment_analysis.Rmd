@@ -661,6 +661,8 @@ q5_fp_summary = q5_fp |>
       all(is.na(relationship)) ~ NA_character_,
       all(relationship == '-', na.rm = TRUE) ~ '-',
       all(relationship == '+', na.rm = TRUE) ~ '+',
+      all(relationship == '-' | relationship == '+/-', na.rm = TRUE) ~ '-',
+      all(relationship == '+' | relationship == '+/-', na.rm = TRUE) ~ '+',
       TRUE ~ '+/-'
     ),
     causation = case_when(
@@ -1855,8 +1857,8 @@ render_graph(fp)
 #            './figures/q5_fire_permafrost_network_color')
 # export_graph(fp,
 #              './figures/q5_fire_permafrost_network_diagram_color.pdf',
-#              height = 4,
-#              width = 6.5)
+#              height = 1062,
+#              width = 1950)
 # export_graph(fp,
 #              './figures/q5_fire_permafrost_network_diagram_color.png',
 #              height = 1062,
@@ -1927,8 +1929,8 @@ render_graph(fp)
 #            './figures/q5_fire_permafrost_network_color')
 # export_graph(fp,
 #              './figures/q5_fire_permafrost_network_diagram_color.pdf',
-#              height = 4,
-#              width = 6.5)
+#              height = 1062,
+#              width = 1950)
 # export_graph(fp,
 #              './figures/q5_fire_permafrost_network_diagram_color.png',
 #              height = 1062,
