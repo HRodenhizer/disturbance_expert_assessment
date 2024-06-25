@@ -995,14 +995,15 @@ ggplot(expertise,
   scale_fill_viridis(discrete = TRUE) +
   scale_linetype_manual(values = c('solid', 'dashed'),
                         guide = guide_legend(title = element_blank())) +
+  scale_x_continuous(limits = c(1, 5)) +
   scale_y_continuous(name = 'Number of Respondents',
                      breaks = seq(0, 12, by = 2)) +
   facet_grid(Category ~ Question, scales = 'free_x')
 
-# ggsave('./figures/expertise.pdf',
+# ggsave('./figures/demographics_expertise.pdf',
 #        height = 6.5,
 #        width = 6.5)
-# ggsave('./figures/expertise.jpg',
+# ggsave('./figures/demographics_expertise.jpg',
 #        height = 6.5,
 #        width = 6.5)
 ```
