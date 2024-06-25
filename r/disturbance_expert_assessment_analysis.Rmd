@@ -2194,10 +2194,10 @@ ggplot(demographics_long,
                                    hjust = 1,
                                    vjust = 1))
 
-# ggsave('./figures/tasks.pdf',
+# ggsave('./figures/demographics_tasks.pdf',
 #        height = 5, 
 #        width = 6.5)
-# ggsave('./figures/tasks.jpg',
+# ggsave('./figures/demographics_tasks.jpg',
 #        height = 5, 
 #        width = 6.5)
 ```
@@ -2327,10 +2327,10 @@ ggplot(expertise,
   facet_wrap(~ Category) +
   theme(axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1))
 
-# ggsave('./figures/expertise_gender.pdf',
+# ggsave('./figures/demographics_expertise_gender.pdf',
 #        height = 4, 
 #        width = 6.5)
-# ggsave('./figures/expertise_gender.jpg',
+# ggsave('./figures/demographics_expertise_gender.jpg',
 #        height = 4, 
 #        width = 6.5)
 
