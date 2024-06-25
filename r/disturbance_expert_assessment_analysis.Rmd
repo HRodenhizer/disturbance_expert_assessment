@@ -970,7 +970,9 @@ expertise = rbind(
              Timescale, 
              Expertise)
 ) |>
-  distinct()
+  distinct() |>
+  mutate(Question = case_when(Question == '1.0' ~ '1',
+                              TRUE ~ Question))
 
 expertise_summary = expertise |>
   summarise(`Expertise Mean` = mean(Expertise, na.rm = TRUE),
