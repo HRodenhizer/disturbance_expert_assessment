@@ -2369,3 +2369,37 @@ ggplot(expertise,
   theme(axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1))
 ```
 
+### Confidence x Expertise
+
+```{r}
+expertise_confidence = q1_3 |>
+  select(
+    Respondent, Question, Category, Scenario, Timescale, Expertise, Confidence
+  ) |>
+  bind_rows(
+    q2 |>
+      select(
+        Respondent, Question, Category, Scenario, Timescale, Expertise, Confidence
+      )
+  ) |>
+  mutate(
+    Question = case_when(Question == '1.0' ~ '1',
+                         TRUE ~ Question)
+  ) |>
+  left_join(demographics, by = c('Respondent', 'Category'))
+```
+
+```{r}
+exp_conf_lm = lm(
+  Confidence ~ Expertise*Question*Category,
+  data = expertise_confidence
+  )
+summary(exp_conf_lm)
+
+ggplot(expertise_confidence, aes(x = Expertise, y = Confidence)) +
+  geom_point(aes(color = Gender)) +
+  geom_smooth(method = 'lm', color = 'black') +
+  facet_grid(Category ~ Question) +
+  scale_color_viridis(discrete = TRUE)
+```
+
