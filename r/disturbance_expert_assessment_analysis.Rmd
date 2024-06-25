@@ -1904,78 +1904,6 @@ nodes = unique(c(q5_fp_summary$from,
 nodes_fp = create_node_df(
   n = length(nodes),
   label = nodes,
-  x = c(0, 2.5, 3.7, 3.5, 5.7, 8, 1.1, 2, 5.2, 2, 3.8, 4, 1.5, 0.7, 3.07, 5.3, 
-        5.75, 3.6),
-  y = c(4, 4, 6.5, 4.9, 4, 4, 5.3, 5.9, 2.5, 3.3, 2.7, 2, 2.5, 6, 5.63, 5.3, 6, 
-        3.5),
-  style = c('filled', rep('rounded', 4), 'filled', rep('rounded', 12)),
-  color = 'gray50',
-  fillcolor = c('gray70', rep('white', 4), 'gray70', rep('white', 12)),
-  shape = c('rectangle', rep('rectangle', 4), 'rectangle', rep('rectangle', 12)),
-  fontcolor = 'black',
-  height = 0.1,
-  width = 0.3,
-  fixedsize = FALSE
-)
-nodes_fp
-
-nodes_fp_filter = nodes_fp |>
-  filter(!label %in% c('Precipitation', 'Short-Lived Climate Forcers'))
-
-edges_fp = create_edge_df(
-  from = q5_fp_summary|>
-    select(from) |>
-    rename(label = from) |>
-    left_join(nodes_fp, by = 'label') |>
-    pull(id),
-  to = q5_fp_summary|>
-    select(to) |>
-    rename(label = to) |>
-    left_join(nodes_fp, by = 'label') |>
-    pull(id),
-  # label = q5_fp_summary$count,
-  fontsize = 10,
-  # color = gray(((q5_fp_summary$count/(max(q5_fp_summary$count)*2)+0.25)*-1)+1),
-  # color = 'gray50',
-  color = case_when(q5_fp_summary$relationship == '+' ~ '#6699CC',
-                    q5_fp_summary$relationship == '+/-' ~ 'gray50',
-                    q5_fp_summary$relationship == '-' ~ '#CC6666'),
-  penwidth = q5_fp_summary$ranking/1.5,
-  style = q5_fp_summary$causation
-)
-edges_fp
-
-edges_fp_filter = edges_fp |>
-  filter(style != 'dotted')
-
-fp = create_graph()
-fp = fp %>%
-  add_nodes_from_table(table = nodes_fp_filter,
-                       label_col = label) %>%
-  add_edges_from_table(table = edges_fp_filter,
-                       from_col = from,
-                       to_col = to,
-                       from_to_map = id_external)
-
-render_graph(fp)
-# save_graph(fp,
-#            './figures/q5_fire_permafrost_network_color')
-# export_graph(fp,
-#              './figures/q5_fire_permafrost_network_diagram_color.pdf',
-#              height = 1062,
-#              width = 1950)
-# export_graph(fp,
-#              './figures/q5_fire_permafrost_network_diagram_color.png',
-#              height = 1062,
-#              width = 1950)
-```
-
-```{r}
-nodes = unique(c(q5_fp_summary$from, 
-                 q5_fp_summary$to))
-nodes_fp = create_node_df(
-  n = length(nodes),
-  label = nodes,
   x = c(0, 2.5, 3.7, 3.5, 5.3, 7.6, 1.7, 2.7, 4.3, 2, 4.2, 4, 1.5, 1.2, 3.07, 
         5.7, 5, 3.2),
   y = c(2.6, 2, 4.3, 2.6, 2, 2.6, 2.95, 3.2, 1.5, 1.1, 0.8, 0, 0.5, 3.7, 3.63, 
@@ -2009,9 +1937,9 @@ edges_fp = create_edge_df(
   fontsize = 10,
   # color = gray(((q5_fp_summary$count/(max(q5_fp_summary$count)*2)+0.25)*-1)+1),
   # color = 'gray50',
-  color = case_when(q5_fp_summary$relationship == '+' ~ '#6699CC',
+  color = case_when(q5_fp_summary$relationship == '+' ~ '#CC6666',
                     q5_fp_summary$relationship == '+/-' ~ 'gray50',
-                    q5_fp_summary$relationship == '-' ~ '#CC6666'),
+                    q5_fp_summary$relationship == '-' ~ '#6699CC'),
   penwidth = q5_fp_summary$ranking/1.5,
   style = q5_fp_summary$causation
 )
@@ -2030,14 +1958,8 @@ fp = fp %>%
                        from_to_map = id_external)
 
 render_graph(fp)
-# save_graph(fp,
-#            './figures/q5_fire_permafrost_network_color')
 # export_graph(fp,
 #              './figures/q5_fire_permafrost_network_diagram_color.pdf',
-#              height = 1062,
-#              width = 1950)
-# export_graph(fp,
-#              './figures/q5_fire_permafrost_network_diagram_color.png',
 #              height = 1062,
 #              width = 1950)
 ```
@@ -2078,9 +2000,9 @@ edges_fw = create_edge_df(
   fontsize = 10,
   # color = gray(((q5_fw_summary$count/(max(q5_fw_summary$count)*2)+0.25)*-1)+1),
   # color = 'gray50',
-  color = case_when(q5_fw_summary$relationship == '+' ~ '#6699CC',
+  color = case_when(q5_fw_summary$relationship == '+' ~ '#CC6666',
                     q5_fw_summary$relationship == '+/-' ~ 'gray50',
-                    q5_fw_summary$relationship == '-' ~ '#CC6666'),
+                    q5_fw_summary$relationship == '-' ~ '#6699CC'),
   penwidth = q5_fw_summary$ranking/1.5,
   style = q5_fw_summary$causation
 )
@@ -2096,16 +2018,10 @@ fw = fw %>%
                        from_to_map = id_external)
 
 render_graph(fw)
-# save_graph(fw,
-#            './figures/q5_fire_weather_network_color')
 # export_graph(fw,
 #              './figures/q5_fire_weather_network_diagram_color.pdf',
 #              height = 1062,
-#              width = 1950)
-# export_graph(fw,
-#              './figures/q5_fire_weather_network_diagram_color.png',
-#              height = 1062,
-#              width = 1950)
+#              width = 1384)
 ```
 
 
