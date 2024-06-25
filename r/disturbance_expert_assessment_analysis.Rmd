@@ -14,6 +14,7 @@ library(RColorBrewer)
 library(readxl)
 library(ggridges)
 library(DiagrammeR)
+library(patchwork)
 library(tidyverse)
 ```
 
@@ -2025,7 +2026,7 @@ gender_count = demographics |>
                                          'All Categories')))
   )
 
-ggplot(gender_count,
+demo_gender = ggplot(gender_count,
        aes(x = Gender, y = Count, fill = Category == 'All Categories')) +
   geom_col() +
   scale_fill_manual(values = c('gray30', 'black')) +
@@ -2034,12 +2035,15 @@ ggplot(gender_count,
         axis.text.x = element_text(angle = 45,
                                    vjust = 1,
                                    hjust = 1))
+demo_gender
 
-# ggsave('./figures/gender.pdf',
-#        height = 4, 
+# ggsave('./figures/demographics_gender.pdf',
+#        demo_gender,
+#        height = 4,
 #        width = 6.5)
-# ggsave('./figures/gender.jpg',
-#        height = 4, 
+# ggsave('./figures/demographics_gender.jpg',
+#        demo_gender,
+#        height = 4,
 #        width = 6.5)
 ```
 
@@ -2064,7 +2068,7 @@ stage_count = demographics |>
                                          'All Categories')))
   )
 
-ggplot(stage_count,
+demo_stage = ggplot(stage_count,
        aes(x = `Career Stage`, y = Count, fill = Category == 'All Categories')) +
   geom_col() +
   scale_fill_manual(values = c('gray30', 'black')) +
@@ -2073,12 +2077,15 @@ ggplot(stage_count,
         axis.text.x = element_text(angle = 45,
                                    vjust = 1,
                                    hjust = 1))
+demo_stage
 
-# ggsave('./figures/career_stage.pdf',
-#        height = 4, 
+# ggsave('./figures/demographics_career_stage.pdf',
+#        demo_stage,
+#        height = 4,
 #        width = 6.5)
-# ggsave('./figures/career_stage.jpg',
-#        height = 4, 
+# ggsave('./figures/demographics_career_stage.jpg',
+#        demo_stage,
+#        height = 4,
 #        width = 6.5)
 ```
 
@@ -2103,7 +2110,7 @@ country_count = demographics %>%
   arrange(desc(Category), desc(Count), Country) %>%
   mutate(Country = factor(Country, levels = c(unique(.$Country)[which(unique(.$Country) != 'Not Provided')], 'Not Provided')))
 
-ggplot(country_count,
+demo_country = ggplot(country_count,
        aes(x = Country, y = Count, fill = Category == 'All Categories')) +
   geom_col() +
   scale_fill_manual(values = c('gray30', 'black')) +
@@ -2112,14 +2119,39 @@ ggplot(country_count,
         axis.text.x = element_text(angle = 45,
                                    vjust = 1,
                                    hjust = 1))
+demo_country
 
-# ggsave('./figures/country.pdf',
-#        height = 6.5, 
+# ggsave('./figures/demographics_country.pdf',
+#        demo_country,
+#        height = 6.5,
 #        width = 6.5)
-# ggsave('./figures/country.jpg',
-#        height = 6.5, 
+# ggsave('./figures/demographics_country.jpg',
+#        demo_country,
+#        height = 6.5,
 #        width = 6.5)
 ```
+
+### Gender/Stage/Country
+
+```{r}
+demo_combo = ((demo_stage + demo_gender )/ (demo_country + facet_wrap(~ Category, ncol = 3))) +
+  plot_annotation(tag_levels = 'a') &
+  # plot_layout(widths = c(1, 1.5)) &
+  theme(axis.title = element_text(size = 10),
+        axis.text = element_text(size = 8),
+        strip.text = element_text(size = 8))
+demo_combo
+
+# ggsave('./figures/demographics_combo.pdf',
+#        demo_combo,
+#        height = 6.5,
+#        width = 6.5)
+# ggsave('./figures/demographics_combo.jpg',
+#        demo_combo,
+#        height = 6.5,
+#        width = 6.5)
+```
+
 
 ### Work Tasks
 
