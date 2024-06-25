@@ -294,7 +294,7 @@ Long Version
 
 ```{r}
 q1_3_long = q1_3 |>
-  filter(Remove != 'maybe' | is.na(Remove)) |>
+  filter(Remove != TRUE | is.na(Remove)) |>
   pivot_longer(Estimate:Upper, 
                names_to = 'Estimate Type', 
                values_to = 'Carbon Impact') |>
@@ -446,7 +446,7 @@ q2_long = q2 |>
                values_to = 'Disturbance Change')
 
 q2_long_clean = q2 |>
-  filter(Remove != 'maybe' | is.na(Remove)) |>
+  filter(Remove != TRUE | is.na(Remove)) |>
   pivot_longer(Frequency:Severity, 
                names_to = 'Variable', 
                values_to = 'Disturbance Change')
@@ -456,7 +456,7 @@ Summarized Version
 
 ```{r}
 q2_summary = q2 |>
-  filter(Remove != 'maybe' | is.na(Remove)) |>
+  filter(Remove != TRUE | is.na(Remove)) |>
   mutate(`Whole Question` = as.numeric(str_sub(Question, 1, 1))) |>
   summarise(
     across(
@@ -564,7 +564,7 @@ Summarized Version
 
 ```{r}
 q4_summary = q4 |>
-  filter(Remove != 'maybe' | is.na(Remove)) |>
+  filter(Remove != TRUE | is.na(Remove)) |>
   summarise(
     across(
       .cols = Availability:Consensus,
@@ -1110,7 +1110,7 @@ suppressWarnings(
 suppressWarnings(
   print(
     ggplot(q1_3 |>
-             filter(Remove != 'maybe' | is.na(Remove)), 
+             filter(Remove != TRUE | is.na(Remove)),
            aes(x = Timescale,
                y = Estimate,
                fill = Scenario)) +
@@ -1209,7 +1209,7 @@ suppressWarnings(
 
 ```{r, fig.height = 6.5, fig.width = 6.5}
 ggplot(q1_3 |>
-       filter(Remove != 'maybe' | is.na(Remove)), 
+       filter(Remove != TRUE | is.na(Remove)), 
        aes(x = Category,
            y = Estimate,
            fill = Scenario)) +
