@@ -316,36 +316,21 @@ q1_3_long = q1_3 |>
 Summarized Version
 
 ```{r}
+se = function(x, na.rm) {
+  sd(x, na.rm = na.rm)/n()
+}
+
 q1_3_summary = q1_3 |>
   filter(Remove != TRUE | is.na(Remove)) |>
   summarise(
+    n = n(),
     across(
       .cols = c(
         Estimate, Lower, Upper, Expertise, Confidence
       ),
-      ~ mean(., na.rm = TRUE),
-      .names = '{.col} Mean'
-    ),
-    across(
-      .cols = c(
-        Estimate, Lower, Upper, Expertise, Confidence
-      ),
-      ~ median(., na.rm = TRUE),
-      .names = '{.col} Median'
-    ),
-    across(
-      .cols = c(
-        Estimate, Lower, Upper, Expertise, Confidence
-      ),
-      ~ sd(., na.rm = TRUE),
-      .names = '{.col} SD'
-    ),
-    across(
-      .cols = c(
-        Estimate, Lower, Upper, Expertise, Confidence
-      ),
-      ~ sd(., na.rm = TRUE)/n(),
-      .names = '{.col} SE'
+      .fns = list(Mean = mean, Median = median, SD = sd, SE = se),
+      .names = '{.col} {.fn}',
+      na.rm = TRUE
     ),
     .by = c(Question, `Whole Question`, Category, Scenario, Timescale)
   ) |>
@@ -361,6 +346,22 @@ q1_3_summary = q1_3 |>
       Scenario == 'RCP 8.5' ~ as.numeric(Category) + 0.3
     )
   )
+
+# write_csv(
+#   q1_3_summary |>
+#     select(
+#       Category, Timescale, Scenario, Question, `Estimate Mean`, `Lower Mean`, 
+#       `Upper Mean`, `Estimate Median`, `Lower Median`, `Upper Median`, 
+#       `Estimate SD`, `Lower SD`, `Upper SD`, n
+#       ) |>
+#     mutate(
+#       across(
+#         `Estimate Mean`:`Upper SD`,
+#         ~ round(.x, 2)
+#         )
+#       ),
+#   './tables/q1_3_summary.csv'
+# )
 ```
 
 Q1/3 Notes
@@ -1026,7 +1027,7 @@ ggplot(expertise,
 
 ### Violin Plot
 
-```{r, fig.height = 9, fig.width = 6.5}
+```{r, fig.height = 6.5, fig.width = 6.5}
 # Median values across respondents
 suppressWarnings(
   print(
@@ -1096,23 +1097,23 @@ suppressWarnings(
         name = expression('Tg C yr'^-1),
         transform = "asinh",
         breaks = c(-1000, -100, -10, -1, 0, 1, 10, 100, 1000, 10000),
-        minor_breaks = c(
-          seq(-4000, -1000, by = 1000),
-          seq(-900, -100, by = 100),
-          seq(-90, -10, by = 10),
-          seq(-9, -1, by = 1),
-          seq(-0.9, -0.1, by = 0.1),
-          seq(0.1, 0.9, by = 0.1),
-          seq(1, 9, by = 1),
-          seq(10, 90, by = 10),
-          seq(100, 900, by = 100),
-          seq(1000, 9000, by = 1000),
-          seq(10000, 50000, by = 10000)
-        ),
-        # labels = function(x) format(x, scientific = TRUE),
         # minor_breaks = c(
-        #   -500, -50, -5, -0.5, 0.5, 5, 50, 500, 5000
-        #   ),
+        #   seq(-4000, -1000, by = 1000),
+        #   seq(-900, -100, by = 100),
+        #   seq(-90, -10, by = 10),
+        #   seq(-9, -1, by = 1),
+        #   seq(-0.9, -0.1, by = 0.1),
+        #   seq(0.1, 0.9, by = 0.1),
+        #   seq(1, 9, by = 1),
+        #   seq(10, 90, by = 10),
+        #   seq(100, 900, by = 100),
+        #   seq(1000, 9000, by = 1000),
+        #   seq(10000, 50000, by = 10000)
+        # ),
+        # labels = function(x) format(x, scientific = TRUE),
+        minor_breaks = c(
+          -500, -50, -5, -0.5, 0.5, 5, 50, 500, 5000
+          ),
         guide = "axis_logticks"
       ) +
       facet_wrap(~ Category, ncol = 2) +
@@ -1128,6 +1129,82 @@ suppressWarnings(
 #        height = 6.5, width = 6.5)
 # ggsave('./figures/q1_3_violin.jpg',
 #        height = 6.5, width = 6.5)
+
+suppressWarnings(
+  print(
+    ggplot(q1_3 |>
+             filter(Remove != TRUE | is.na(Remove)),
+           aes(x = Timescale,
+               y = Estimate,
+               fill = Scenario)) +
+      geom_hline(yintercept = 0,
+                 color = 'gray30') +
+      geom_point(aes(y = Estimate,
+                     color = Scenario),
+                 position = position_jitterdodge(dodge.width = 0.9,
+                                                 jitter.width = 0.7,
+                                                 seed = 1),
+                 size = 1,
+                 alpha = 0.5) +
+      geom_segment(aes(y = Lower,
+                       yend = Upper,
+                       color = Scenario),
+                   position = position_jitterdodge(dodge.width = 0.9,
+                                                   jitter.width = 0.7,
+                                                   seed = 1),
+                   width = 0,
+                   alpha = 0.5) +
+      geom_violin(color = 'gray10',
+                  alpha = 0.25,
+                  position = position_dodge(width = 0.9)) +
+      # scale_color_viridis(name = 'Emissions\nPathway',
+      #                     begin = 0.1,
+      #                     end = 0.9,
+      #                     discrete = TRUE,
+      #                     option = 'inferno',
+      #                     direction = -1) +
+      scale_color_manual(name = 'Emissions Pathway',
+                         values = scenario_colors,
+                         guide = guide_legend(ncol = 2)) +
+      scale_fill_manual(name = 'Emissions Pathway',
+                        values = scenario_colors,
+                        guide = guide_legend(ncol = 2)) +
+      geom_linerange(data = q1_3_summary,
+                     aes(xmin = `Dodged Timescale 1` - 0.1, 
+                         xmax = `Dodged Timescale 1` + 0.1,
+                         y = `Estimate Median`,
+                         linewidth = 'Estimate'),
+                     color = 'black') +
+      geom_linerange(data = q1_3_summary,
+                     aes(xmin = `Dodged Timescale 1` - 0.075, 
+                         xmax = `Dodged Timescale 1` + 0.075,
+                         y = `Lower Median`,
+                         linewidth = 'Lower/Upper'),
+                     color = 'black') +
+      geom_linerange(data = q1_3_summary,
+                     aes(xmin = `Dodged Timescale 1` - 0.075, 
+                         xmax = `Dodged Timescale 1` + 0.075,
+                         y = `Upper Median`,
+                         linewidth = 'Lower/Upper'),
+                     color = 'black') +
+      scale_linewidth_manual(
+        name = 'Median Values',
+        values = c(0.7, 0.3),
+        # guide = guide_legend(
+        #   theme = theme(legend.title = element_blank())
+        # )
+      ) +
+      scale_y_continuous(
+        name = expression('Tg C yr'^-1)
+        ) +
+      facet_wrap(~ Category, ncol = 2) +
+      theme(axis.title.x = element_blank(),
+            axis.text.x = element_text(angle = 45, hjust = 1),
+            legend.position = 'inside',
+            legend.position.inside = c(0.75, 0.12),
+            legend.justification = c(0.5, 0.5))
+  )
+)
 ```
 
 ```{r, fig.height = 6.5, fig.width = 6.5}

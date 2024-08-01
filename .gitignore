@@ -1,6 +1,7 @@
 # Project specific
 /data
 /figures
+/tables
 
 # History files
 .Rhistory
