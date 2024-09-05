@@ -1703,7 +1703,8 @@ ggplot(q2_long_clean,
                                 '5 - 20',
                                 '20 - 50',
                                 '>= 50')) +
-  facet_grid(Category ~ Variable)
+  facet_grid(Category ~ Variable) +
+  theme(axis.title.x = element_blan)
   
 # ggsave('./figures/q2_overview.pdf',
 #        height = 6.5,
@@ -1778,6 +1779,8 @@ ggplot(
 
 
 ## Q4
+
+### Scatter Plot
 
 ```{r, fig.height = 9, fig.width = 6.5}
 ggplot(q4, 

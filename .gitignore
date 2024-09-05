@@ -2,6 +2,7 @@
 /data
 /figures
 /tables
+/manuscript
 
 # History files
 .Rhistory
