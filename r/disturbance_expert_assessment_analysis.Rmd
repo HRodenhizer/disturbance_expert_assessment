@@ -320,15 +320,20 @@ se = function(x, na.rm) {
   sd(x, na.rm = na.rm)/n()
 }
 
+n_complete = function(x, na.rm) {
+  sum(!is.na(x))
+}
+
 q1_3_summary = q1_3 |>
   filter(Remove != TRUE | is.na(Remove)) |>
   summarise(
-    n = n(),
     across(
       .cols = c(
         Estimate, Lower, Upper, Expertise, Confidence
       ),
-      .fns = list(Mean = mean, Median = median, SD = sd, SE = se),
+      .fns = list(
+        Mean = mean, Median = median, SD = sd, SE = se, n = n_complete
+        ),
       .names = '{.col} {.fn}',
       na.rm = TRUE
     ),
@@ -352,7 +357,7 @@ q1_3_summary = q1_3 |>
 #     select(
 #       Category, Timescale, Scenario, Question, `Estimate Mean`, `Lower Mean`, 
 #       `Upper Mean`, `Estimate Median`, `Lower Median`, `Upper Median`, 
-#       `Estimate SD`, `Lower SD`, `Upper SD`, n
+#       `Estimate SD`, `Lower SD`, `Upper SD`, `Estimate n`, `Lower n`, `Upper n`
 #       ) |>
 #     mutate(
 #       across(
