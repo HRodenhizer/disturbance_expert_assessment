@@ -735,6 +735,8 @@ mean_from_string = function(string, delim) {
   return(new_value)
 } 
 
+research_approaches = c('Field Work', 'Remote Sensing', 'Modelling')
+
 demographics = read_excel('data/Demographic Information.xlsx') |>
   mutate(
     across(Gender:`Previous Expert Assessment`, 
@@ -774,19 +776,37 @@ demographics = read_excel('data/Demographic Information.xlsx') |>
       Country %in% c('China') ~ 'Asia',
       Country %in% c('Russia') ~ 'Russia',
       Country == 'Not Provided' ~ 'Not Provided'
-      )
+    )
   ) |>
   rowwise() |>
-  mutate(across(
-    `Field Work`:Other, 
-    ~ case_when(
-      str_detect(.x, '<|>') ~ as.numeric(str_extract(.x, '\\d+')),
-      str_detect(.x, '-') ~ mean_from_string(.x, '-'),
-      TRUE ~ as.numeric(.x)
+  mutate(
+    across(
+      `Field Work`:Other, 
+      ~ case_when(
+        str_detect(.x, '<|>') ~ as.numeric(str_extract(.x, '\\d+')),
+        str_detect(.x, '-') ~ mean_from_string(.x, '-'),
+        TRUE ~ as.numeric(.x)
+      )
     )
-  ),
   ) |>
-  ungroup()
+  mutate(
+    `Primary Research Approach` = str_flatten(
+      research_approaches[
+        which(
+          c(`Field Work`, `Remote Sensing`, Modelling) == max(c(`Field Work`, `Remote Sensing`, Modelling))
+        )
+      ],
+      collapse = '/'
+    ),
+    .after = Modelling
+  ) |>
+  ungroup() |>
+  mutate(
+    `Primary Research Approach` = case_when(
+      `Primary Research Approach` == '' ~ 'Not Provided',
+      TRUE ~ `Primary Research Approach`
+    )
+  )
 ```
 
 ```{r}
@@ -1709,7 +1729,7 @@ ggplot(q2_long_clean,
                                 '20 - 50',
                                 '>= 50')) +
   facet_grid(Category ~ Variable) +
-  theme(axis.title.x = element_blan)
+  theme(axis.title.x = element_blank())
   
 # ggsave('./figures/q2_overview.pdf',
 #        height = 6.5,
@@ -2073,7 +2093,20 @@ stage_count = demographics |>
                                          'Permafrost',
                                          'Weather',
                                          'All Categories')))
-  )
+  ) |>
+  mutate(
+    provided = case_when(
+      `Career Stage` == 'Not Provided' ~ FALSE,
+      TRUE ~ TRUE
+    )
+  ) %>%
+  arrange(
+    desc(Category), 
+    desc(provided), 
+    desc(Count), 
+    `Career Stage`
+  ) %>%
+  select(-provided)
 
 demo_stage = ggplot(stage_count,
        aes(x = `Career Stage`, y = Count, fill = Category == 'All Categories')) +
@@ -2114,8 +2147,24 @@ country_count = demographics %>%
                                          'Weather',
                                          'All Categories')))
   ) %>%
-  arrange(desc(Category), desc(Count), Country) %>%
-  mutate(Country = factor(Country, levels = c(unique(.$Country)[which(unique(.$Country) != 'Not Provided')], 'Not Provided')))
+  mutate(
+    Country = factor(
+      Country, 
+      levels = c(unique(.$Country)[which(unique(.$Country) != 'Not Provided')],
+                 'Not Provided')
+    ),
+    provided = case_when(
+      Country == 'Not Provided' ~ FALSE,
+      TRUE ~ TRUE
+    )
+  ) %>%
+  arrange(
+    desc(Category), 
+    desc(provided), 
+    desc(Count), 
+    Country
+  ) %>%
+  select(-provided)
 
 demo_country = ggplot(country_count,
        aes(x = Country, y = Count, fill = Category == 'All Categories')) +
@@ -2156,8 +2205,24 @@ region_count = demographics %>%
                                          'Weather',
                                          'All Categories')))
   ) %>%
-  arrange(desc(Category), desc(Count), Region) %>%
-  mutate(Region = factor(Region, levels = c(unique(.$Region)[which(unique(.$Region) != 'Not Provided')], 'Not Provided')))
+  mutate(
+    Region = factor(
+      Region, 
+      levels = c(unique(.$Region)[which(unique(.$Region) != 'Not Provided')], 
+                 'Not Provided')
+    ),
+    provided = case_when(
+      Region == 'Not Provided' ~ FALSE,
+      TRUE ~ TRUE
+    )
+  ) %>%
+  arrange(
+    desc(Category), 
+    desc(provided), 
+    desc(Count), 
+    Region
+  ) %>%
+  select(-provided)
 
 demo_region = ggplot(region_count,
        aes(x = Region, y = Count, fill = Category == 'All Categories')) +
@@ -2176,6 +2241,72 @@ demo_region
 #        width = 6.5)
 # ggsave('./figures/demographics_region.jpg',
 #        demo_region,
+#        height = 6.5,
+#        width = 6.5)
+```
+
+### Research Approach
+
+```{r, fig.height = 6.5, fig.width = 6.5}
+research_approach_count = demographics %>%
+  summarise(Count = n(),
+            .by = c(`Primary Research Approach`, Category)) %>%
+  rbind(
+    demographics %>%
+      summarise(Count = n(),
+                .by = `Primary Research Approach`) %>%
+      mutate(
+        Category = factor(
+          'All Categories',
+          levels = c('Anthropogenic',
+                     'Biotic',
+                     'Fire',
+                     'Permafrost',
+                     'Weather',
+                     'All Categories')
+        )
+      )
+  ) %>%
+  mutate(
+    `Primary Research Approach` = factor(
+      `Primary Research Approach`, 
+      levels = c(
+        unique(.$`Primary Research Approach`)[
+          which(unique(.$`Primary Research Approach`) != 'Not Provided')
+          ], 
+        'Not Provided'
+        )
+    ),
+    provided = case_when(
+      `Primary Research Approach` == 'Not Provided' ~ FALSE,
+      TRUE ~ TRUE
+    )
+  ) %>%
+  arrange(
+    desc(Category), 
+    desc(provided), 
+    desc(Count), 
+    `Primary Research Approach`
+    ) %>%
+  select(-provided)
+
+demo_research_approach = ggplot(research_approach_count,
+       aes(x = `Primary Research Approach`, y = Count, fill = Category == 'All Categories')) +
+  geom_col() +
+  scale_fill_manual(values = c('gray30', 'black')) +
+  facet_wrap(~ Category, ncol = 2) +
+  theme(legend.position = 'none',
+        axis.text.x = element_text(angle = 45,
+                                   vjust = 1,
+                                   hjust = 1))
+demo_research_approach
+
+# ggsave('./figures/demographics_research_approach.pdf',
+#        demo_research_approach,
+#        height = 6.5,
+#        width = 6.5)
+# ggsave('./figures/demographics_research_approach.jpg',
+#        demo_research_approach,
 #        height = 6.5,
 #        width = 6.5)
 ```
@@ -2203,6 +2334,36 @@ demo_combo
 #        width = 6.5)
 ```
 
+### Demographics Table
+
+```{r}
+demo_df = stage_count |>
+  pivot_wider(names_from = Category, values_from = Count) |>
+  rename(Demographic = 1) |>
+  mutate(Category = 'Career Stage', .before = Demographic) |>
+  bind_rows(
+    gender_count |>
+      pivot_wider(names_from = Category, values_from = Count) |>
+      rename(Demographic = 1) |>
+      mutate(Category = 'Gender', .before = Demographic)
+  ) |>
+  bind_rows(
+    region_count |>
+      pivot_wider(names_from = Category, values_from = Count) |>
+      rename(Demographic = 1) |>
+      mutate(Category = 'Region', .before = Demographic)
+  ) |>
+  bind_rows(
+    research_approach_count |>
+      pivot_wider(names_from = Category, values_from = Count) |>
+      rename(Demographic = 1) |>
+      mutate(Category = 'Primary Research Approach', .before = Demographic)
+  ) |>
+  select(Category, Demographic, Anthropogenic, Biotic, Fire, Permafrost, Weather, `All Categories`)
+
+# write_csv(demo_df,
+#           './tables/demographics_summary.csv')
+```
 
 ### Work Tasks
 
