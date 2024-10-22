@@ -3,6 +3,8 @@
 /figures
 /tables
 /manuscript
+*.jpg
+*.png
 
 # History files
 .Rhistory
