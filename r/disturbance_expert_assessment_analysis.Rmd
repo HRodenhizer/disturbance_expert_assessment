@@ -811,7 +811,7 @@ demographics = read_excel('data/Demographic Information.xlsx') |>
 
 ```{r}
 demographics_long = demographics |>
-  pivot_longer(`Field Work`:Other,
+  pivot_longer(c(`Field Work`:Modelling, Other),
                names_to = 'Task',
                values_to = 'Time') |>
   mutate(Task = factor(Task,
@@ -1089,9 +1089,15 @@ suppressWarnings(
       #                     direction = -1) +
       scale_color_manual(name = 'Emissions Pathway',
                          values = scenario_colors,
+                         labels = c(expression('1.5'*degree*'C'), 
+                                    expression('2'*degree*'C'), 
+                                    'RCP8.5'),
                          guide = guide_legend(ncol = 2)) +
       scale_fill_manual(name = 'Emissions Pathway',
                         values = scenario_colors,
+                        labels = c(expression('1.5'*degree*'C'), 
+                                   expression('2'*degree*'C'), 
+                                   'RCP8.5'),
                         guide = guide_legend(ncol = 2)) +
       geom_linerange(data = q1_3_summary,
                      aes(xmin = `Dodged Timescale 1` - 0.1, 
@@ -1119,7 +1125,7 @@ suppressWarnings(
         # )
       ) +
       scale_y_continuous(
-        name = expression('Tg C yr'^-1),
+        name = expression('TgC yr'^-1),
         transform = "asinh",
         breaks = c(-1000, -100, -10, -1, 0, 1, 10, 100, 1000, 10000),
         # minor_breaks = c(
@@ -1220,9 +1226,9 @@ suppressWarnings(
         # )
       ) +
       scale_y_continuous(
-        name = expression('Tg C yr'^-1)
+        name = expression('TgC yr'^-1)
         ) +
-      facet_wrap(~ Category, ncol = 2) +
+      facet_wrap(~ Category, ncol = 2, scales = 'free_y') +
       theme(axis.title.x = element_blank(),
             axis.text.x = element_text(angle = 45, hjust = 1),
             legend.position = 'inside',
@@ -1300,7 +1306,7 @@ ggplot(q1_3 |>
     # )
   ) +
   scale_y_continuous(
-    name = expression('Tg C yr'^-1),
+    name = expression('TgC yr'^-1),
     transform = "asinh",
     breaks = c(-1000, -100, -10, -1, 0, 1, 10, 100, 1000, 10000),
     minor_breaks = c(
@@ -1401,7 +1407,7 @@ ggplot(q1_3 |>
     # )
   ) +
   scale_y_continuous(
-    name = expression('Tg C yr'^-1),
+    name = expression('TgC yr'^-1),
     # transform = "asinh",
     # breaks = c(-1000, -100, -10, -1, 0, 1, 10, 100, 1000, 10000),
     # minor_breaks = c(
@@ -1508,7 +1514,7 @@ ggplot(q1_3_summary,
   #                     discrete = TRUE,
   #                     option = 'inferno',
   #                     direction = -1) +
-  scale_y_continuous(name = expression('Tg C yr'^-1)) +
+  scale_y_continuous(name = expression('TgC yr'^-1)) +
   scale_color_manual(name = 'Emissions\nPathway',
                      values = scenario_colors) +
   facet_grid(Category ~ ., scales = 'free_y') +
@@ -1552,7 +1558,7 @@ ggplot(q1_3_summary,
   #                     discrete = TRUE,
   #                     option = 'inferno',
   #                     direction = -1) +
-  scale_y_continuous(name = expression('Tg C yr'^-1)) +
+  scale_y_continuous(name = expression('TgC yr'^-1)) +
   scale_color_manual(name = 'Emissions\nPathway',
                      values = scenario_colors) +
   facet_grid(Category ~ ., scales = 'free_y') +
@@ -1577,7 +1583,7 @@ ggplot(q1_3_long,
   #                     discrete = TRUE,
   #                     option = 'inferno',
   #                     direction = -1) +
-  scale_y_continuous(name = expression('Tg C yr'^-1)) +
+  scale_y_continuous(name = expression('TgC yr'^-1)) +
   scale_fill_manual(name = 'Emissions\nPathway',
                      values = scenario_colors) +
   facet_grid(Category ~ `Estimate Type`, scales = 'free_y') +
@@ -1717,8 +1723,13 @@ ggplot(q2_long_clean,
                color = 'black',
                linewidth = 0.25,
                outlier.size = 0.5) +
-  scale_fill_manual(name = 'Emissions\nPathway',
-                     values = scenario_colors[-1]) +
+  scale_fill_manual(
+    name = 'Emissions Scenario',
+    labels = c(expression('1.5'*degree*'C'), 
+               expression('2'*degree*'C'), 
+               'RCP8.5'),
+    values = scenario_colors[-1]
+  ) +
   scale_y_continuous(name = 'Change in Disturbance (%)',
                      breaks = seq(-3, 3),
                      labels = c('<= -50',
@@ -1730,6 +1741,37 @@ ggplot(q2_long_clean,
                                 '>= 50')) +
   facet_grid(Category ~ Variable) +
   theme(axis.title.x = element_blank())
+
+ggplot(q2_long_clean, 
+       aes(x = Timescale, 
+           y = `Disturbance Change`, 
+           fill = Scenario)) +
+  geom_hline(yintercept = 0,
+             color = 'gray30') +
+  geom_boxplot(position = position_dodge(width = 0.75),
+               color = 'black',
+               linewidth = 0.25,
+               outlier.size = 0.5) +
+  scale_fill_manual(
+    name = 'Emissions Scenario',
+    labels = c(expression('1.5'*degree*'C'), 
+               expression('2'*degree*'C'), 
+               'RCP8.5'),
+    values = scenario_colors[-1]
+  ) +
+  scale_y_continuous(name = 'Change in Disturbance (%)',
+                     breaks = seq(-3, 3),
+                     labels = c('<= -50',
+                                '-20 - -50',
+                                '-5 - -20',
+                                '-5 - 5',
+                                '5 - 20',
+                                '20 - 50',
+                                '>= 50')) +
+  facet_grid(Variable ~ Category) +
+  theme(axis.title.x = element_blank(),
+        panel.spacing.y = unit(0.75, 'lines'),
+        legend.position = 'bottom')
   
 # ggsave('./figures/q2_overview.pdf',
 #        height = 6.5,
