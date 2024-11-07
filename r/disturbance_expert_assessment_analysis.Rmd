@@ -13,6 +13,8 @@ library(viridis)
 library(RColorBrewer)
 library(readxl)
 library(ggridges)
+library(ggforce)
+library(ggdensity)
 library(DiagrammeR)
 library(patchwork)
 # library(emmeans)
@@ -552,7 +554,15 @@ q4 = read_excel('./data/Q4_figure.xlsx',
             by = c('Category', 'Whole Question', 'Respondent', 'Question', 'Subquestion')) |>
   inner_join(key,
             by = c('Category', 'Respondent')) |>
-  arrange(Category, Respondent, `Whole Question`, Subquestion)
+  arrange(Category, Respondent, `Whole Question`, Subquestion) |>
+  mutate(
+    Quadrant = case_when(
+      Availability < 0 & Consensus < 0 ~ 'Speculative',
+      Availability < 0 & Consensus > 0 ~ 'Established but Incomplete',
+      Availability > 0 & Consensus < 0 ~ 'Competing Explanations',
+      Availability > 0 & Consensus > 0 ~ 'Well Established'
+    )
+  )
 
 nrow(q4) == nrow(key)*4
 ```
@@ -1851,29 +1861,46 @@ ggplot(
 
 ```{r, fig.height = 9, fig.width = 6.5}
 ggplot(q4, 
-       aes(x = Availability, y = Consensus, color = Aspect)) +
+       aes(x = Availability, y = Consensus, color = Aspect, fill = Aspect)) +
   geom_hline(yintercept = 0,
              color = 'gray30') +
   geom_vline(xintercept = 0,
              color = 'gray30') +
-  geom_point(alpha = 0.3) +
+  geom_hdr(
+    color = 'transparent',
+    probs = c(0.8),
+    method = 'mvnorm'
+    ) +
+  scale_alpha_manual(
+    values = c(0.1),
+    guide = 'none'
+    ) +
+  # geom_mark_hull(aes(fill = Aspect),
+  #                alpha = 0.1,
+  #                color = 'transparent',
+  #                concavity = 10,
+  #                expand = unit(0, "mm"),
+  #                radius = unit(0, "mm")) +
+  geom_point(
+    alpha = 0.3
+    ) +
   geom_errorbar(data = q4_summary,
                 aes(x = `Availability Mean`,
                     ymin = `Consensus Mean` - `Consensus SD`,
-                    ymax = `Consensus Mean` + `Consensus SD`, 
+                    ymax = `Consensus Mean` + `Consensus SD`,
                  color = Aspect,
                  width = 0.05),
                 inherit.aes = FALSE) +
   geom_errorbarh(data = q4_summary,
                 aes(y = `Consensus Mean`,
                     xmin = `Availability Mean` - `Availability SD`,
-                    xmax = `Availability Mean` + `Availability SD`, 
+                    xmax = `Availability Mean` + `Availability SD`,
                  color = Aspect,
                  height = 0.05),
                 inherit.aes = FALSE) +
   geom_point(data = q4_summary,
-             aes(x = `Availability Mean`, 
-                 y = `Consensus Mean`, 
+             aes(x = `Availability Mean`,
+                 y = `Consensus Mean`,
                  color = Aspect),
              size = 3) +
   geom_text(data = tibble(
@@ -1899,9 +1926,12 @@ ggplot(q4,
                      labels = c('Low', 'High')) +
   scale_color_viridis(discrete = TRUE,
                       na.translate = FALSE) +
+  scale_fill_viridis(discrete = TRUE,
+                      na.translate = FALSE) +
   facet_wrap(~ Category, ncol = 2) +
   coord_fixed(expand = FALSE) +
-  theme(legend.position = 'inside',
+  theme(legend.title = element_blank(),
+        legend.position = 'inside',
         legend.position.inside = c(0.75, 0.09),
         legend.justification = c(0.5, 0),
         axis.text.x = element_text(angle = 90, vjust = 0.5))
@@ -1912,6 +1942,19 @@ ggplot(q4,
 # ggsave('./figures/q4_compiled.jpg',
 #        height = 9,
 #        width = 6.5)
+```
+
+```{r}
+q4_quadrant_info = q4 |>
+  filter(!is.na(Quadrant)) |>
+  summarise(n = n(),
+            .by = c(Category, Aspect, Quadrant)) |>
+  mutate(percent = n/sum(n, na.rm = TRUE),
+         .by = c(Category, Aspect)) |>
+  arrange(Aspect, Category, -n)
+
+q4_quadrant_info
+View(q4_quadrant_info |> filter(n == max(n), .by = c(Category, Aspect)))
 ```
 
 ### Q4 Confidence
