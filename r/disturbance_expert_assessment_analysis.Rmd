@@ -1190,7 +1190,7 @@ suppressWarnings(
         filter(Remove != TRUE | is.na(Remove)),
       aes(x = Timescale, y = Estimate, fill = Scenario)
     ) +
-      geom_hline(yintercept = 0, color = 'gray30') +
+      geom_hline(yintercept = 0, color = 'gray30', linewidth = 0.2) +
       geom_point(
         aes(y = Estimate, color = Scenario),
         position = position_jitterdodge(
@@ -1299,20 +1299,10 @@ suppressWarnings(
         #   seq(10000, 50000, by = 10000)
         # ),
         # labels = function(x) format(x, scientific = TRUE),
-        minor_breaks = c(
-          -500,
-          -50,
-          -5,
-          -0.5,
-          0.5,
-          5,
-          50,
-          500,
-          5000
-        ),
-        guide = "axis_logticks"
+        minor_breaks = c(-500, -50, -5, -0.5, 0.5, 5, 50, 500, 5000),
+        guide = guide_axis_logticks(negative.small = 1)
       ) +
-      facet_wrap(~Category, ncol = 2) +
+      facet_wrap(~Category, ncol = 5) +
       theme(
         axis.title.x = element_blank(),
         axis.text.x = element_text(angle = 45, hjust = 1),
@@ -1324,10 +1314,10 @@ suppressWarnings(
   )
 )
 
-# ggsave('./figures/q1_3_violin_no_legend.pdf',
-#        height = 180, width = 180, units = "mm")
-# ggsave('./figures/q1_3_violin_no_legend.jpg',
-#        height = 180, width = 180, units = "mm")
+# ggsave('./figures/q1_3_violin_no_legend_one_row.pdf',
+#        height = 90, width = 180, units = "mm")
+# ggsave('./figures/q1_3_violin_no_legend_one_row.jpg',
+#        height = 90, width = 180, units = "mm")
 
 suppressWarnings(
   print(
@@ -2190,6 +2180,7 @@ ggplot(
   #                expand = unit(0, "mm"),
   #                radius = unit(0, "mm")) +
   geom_point(
+    size = 0.5,
     alpha = 0.5
   ) +
   geom_errorbar(
@@ -2209,30 +2200,30 @@ ggplot(
       y = `Consensus Mean`,
       xmin = `Availability Mean` - `Availability SD`,
       xmax = `Availability Mean` + `Availability SD`,
-      color = Aspect,
-      height = 0.05
+      color = Aspect
     ),
     inherit.aes = FALSE
   ) +
   geom_point(
     data = q4_summary,
     aes(x = `Availability Mean`, y = `Consensus Mean`, color = Aspect),
-    size = 3
+    size = 2
   ) +
   geom_text(
     data = tibble(
       x = c(-0.5, 0.5, -0.5, 0.5),
-      y = c(0.95, 0.95, -0.95, -0.95),
+      y = c(1, 1, -1, -1),
+      Category = "Anthropogenic",
       label = c(
-        'Established but\nIncomplete',
-        'Well Established',
+        'Established\nbut Incomplete',
+        'Well\nEstablished',
         'Speculative',
-        'Competing Explanations'
+        'Competing\nExplanations'
       ),
       vjust = c(1, 1, 0, 0)
     ),
     aes(x = x, y = y, label = label, vjust = vjust),
-    size = 2.5,
+    size = 2,
     inherit.aes = FALSE
   ) +
   scale_x_continuous(
@@ -2249,22 +2240,30 @@ ggplot(
   ) +
   scale_color_viridis(discrete = TRUE, na.translate = FALSE) +
   scale_fill_viridis(discrete = TRUE, na.translate = FALSE) +
-  facet_wrap(~Category, ncol = 2) +
-  coord_fixed(expand = FALSE) +
+  facet_wrap(~Category, ncol = 5) +
+  coord_fixed() +
   theme(
     legend.title = element_blank(),
-    legend.position = 'inside',
-    legend.position.inside = c(0.75, 0.09),
-    legend.justification = c(0.5, 0),
-    axis.text.x = element_text(angle = 90, vjust = 0.5)
+    legend.position = "none",
+    # legend.position = 'inside',
+    # legend.position.inside = c(0.75, 0.09),
+    # legend.justification = c(0.5, 0),
+    axis.text.x = element_text(angle = 90, vjust = 0.5),
+    panel.grid = element_blank()
   )
 
-# ggsave('./figures/q4_compiled.pdf',
-#        height = 9,
-#        width = 6.5)
-# ggsave('./figures/q4_compiled.jpg',
-#        height = 9,
-#        width = 6.5)
+# ggsave(
+#   './figures/q4_compiled_no_legend_one_row.pdf',
+#   height = 55,
+#   width = 180,
+#   units = "mm"
+# )
+# ggsave(
+#   './figures/q4_compiled_no_legend_one_row.jpg',
+#   height = 55,
+#   width = 180,
+#   units = "mm"
+# )
 ```
 
 ```{r}
