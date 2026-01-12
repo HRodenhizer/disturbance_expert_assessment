@@ -110,7 +110,7 @@ participant_frame = question_frame |>
 ## Participant Key
 
 ```{r}
-key = read_excel('./data/Expert assessment_participant key.xlsx') |>
+key = read_excel('./do_not_share/Expert assessment_participant key.xlsx') |>
   select(-2) |>
   rename(Respondent = Number) |>
   pivot_longer(
@@ -137,7 +137,7 @@ key = read_excel('./data/Expert assessment_participant key.xlsx') |>
 ## QA/QC Sheet
 
 ```{r}
-qa_qc = read_excel('data/QA_QC Notes.xlsx', sheet = 2) |>
+qa_qc = read_excel('do_not_share/QA_QC Notes.xlsx', sheet = 2) |>
   mutate(
     Question = case_when(Question == '1' ~ '1.0', TRUE ~ Question),
     Category = factor(
@@ -1181,6 +1181,7 @@ ggplot(expertise, aes(x = Expertise, fill = Timescale)) +
 
 ### Violin Plot
 
+#### Log Scale
 ```{r, fig.height = 6.5, fig.width = 6.5}
 # Median values across respondents
 suppressWarnings(
@@ -1231,7 +1232,7 @@ suppressWarnings(
           expression('2' * degree * 'C'),
           'RCP8.5'
         ),
-        guide = guide_legend(ncol = 2)
+        guide = guide_legend(nrow = 2)
       ) +
       scale_fill_manual(
         name = 'Emissions Pathway',
@@ -1242,7 +1243,7 @@ suppressWarnings(
           expression('2' * degree * 'C'),
           'RCP8.5'
         ),
-        guide = guide_legend(ncol = 2)
+        guide = guide_legend(nrow = 2)
       ) +
       geom_linerange(
         data = q1_3_summary,
@@ -1277,6 +1278,7 @@ suppressWarnings(
       scale_linewidth_manual(
         name = 'Median Values',
         values = c(0.7, 0.3),
+        guide = guide_legend(nrow = 2)
         # guide = guide_legend(
         #   theme = theme(legend.title = element_blank())
         # )
@@ -1306,7 +1308,10 @@ suppressWarnings(
       theme(
         axis.title.x = element_blank(),
         axis.text.x = element_text(angle = 45, hjust = 1),
-        legend.position = 'none',
+        legend.position = "bottom",
+        legend.margin = margin(t = 0, r = 0, b = 0, l = 0),
+        # legend.box = "vertical"
+        # legend.position = 'none',
         # legend.position = 'inside',
         # legend.position.inside = c(0.77, 0.12),
         # legend.justification = c(0.5, 0.5)
@@ -1314,11 +1319,23 @@ suppressWarnings(
   )
 )
 
-# ggsave('./figures/q1_3_violin_no_legend_one_row.pdf',
-#        height = 90, width = 180, units = "mm")
-# ggsave('./figures/q1_3_violin_no_legend_one_row.jpg',
-#        height = 90, width = 180, units = "mm")
+# ggsave(
+#   './figures/q1_3_violin_one_row.pdf',
+#   height = 105,
+#   width = 180,
+#   units = "mm"
+# )
+# ggsave(
+#   './figures/q1_3_violin_one_row.jpg',
+#   height = 105,
+#   width = 180,
+#   units = "mm"
+# )
+```
 
+#### No Log Scale
+
+```{r}
 suppressWarnings(
   print(
     ggplot(
@@ -1419,6 +1436,8 @@ suppressWarnings(
   )
 )
 ```
+
+#### By Category
 
 ```{r, fig.height = 6.5, fig.width = 6.5}
 ggplot(
@@ -2239,12 +2258,14 @@ ggplot(
     labels = c('Low', 'High')
   ) +
   scale_color_viridis(discrete = TRUE, na.translate = FALSE) +
-  scale_fill_viridis(discrete = TRUE, na.translate = FALSE) +
+  scale_fill_viridis(discrete = TRUE, na.translate = FALSE, guide = "none") +
   facet_wrap(~Category, ncol = 5) +
   coord_fixed() +
   theme(
     legend.title = element_blank(),
-    legend.position = "none",
+    legend.position = "bottom",
+    legend.margin = margin(t = 0, r = 0, b = 0, l = 0),
+    # legend.position = "none",
     # legend.position = 'inside',
     # legend.position.inside = c(0.75, 0.09),
     # legend.justification = c(0.5, 0),
@@ -2252,18 +2273,18 @@ ggplot(
     panel.grid = element_blank()
   )
 
-# ggsave(
-#   './figures/q4_compiled_no_legend_one_row.pdf',
-#   height = 55,
-#   width = 180,
-#   units = "mm"
-# )
-# ggsave(
-#   './figures/q4_compiled_no_legend_one_row.jpg',
-#   height = 55,
-#   width = 180,
-#   units = "mm"
-# )
+ggsave(
+  './figures/q4_compiled_one_row.pdf',
+  height = 65,
+  width = 180,
+  units = "mm"
+)
+ggsave(
+  './figures/q4_compiled_one_row.jpg',
+  height = 65,
+  width = 180,
+  units = "mm"
+)
 ```
 
 ```{r}
