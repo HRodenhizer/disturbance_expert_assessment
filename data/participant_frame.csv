@@ -1,0 +1,1079 @@
+Category,Whole Question,Timescale,Scenario,Respondent,Question
+Anthropogenic,1,Current,Current,1,1.0
+Anthropogenic,2,2100,1.5 C,1,2a
+Anthropogenic,2,2100,2 C,1,2a
+Anthropogenic,2,2100,RCP 8.5,1,2a
+Anthropogenic,2,2300,1.5 C,1,2b
+Anthropogenic,2,2300,2 C,1,2b
+Anthropogenic,2,2300,RCP 8.5,1,2b
+Anthropogenic,3,2100,1.5 C,1,3a
+Anthropogenic,3,2100,2 C,1,3a
+Anthropogenic,3,2100,RCP 8.5,1,3a
+Anthropogenic,3,2300,1.5 C,1,3b
+Anthropogenic,3,2300,2 C,1,3b
+Anthropogenic,3,2300,RCP 8.5,1,3b
+Anthropogenic,4,Current,Current,1,4a
+Anthropogenic,1,Current,Current,2,1.0
+Anthropogenic,2,2100,1.5 C,2,2a
+Anthropogenic,2,2100,2 C,2,2a
+Anthropogenic,2,2100,RCP 8.5,2,2a
+Anthropogenic,2,2300,1.5 C,2,2b
+Anthropogenic,2,2300,2 C,2,2b
+Anthropogenic,2,2300,RCP 8.5,2,2b
+Anthropogenic,3,2100,1.5 C,2,3a
+Anthropogenic,3,2100,2 C,2,3a
+Anthropogenic,3,2100,RCP 8.5,2,3a
+Anthropogenic,3,2300,1.5 C,2,3b
+Anthropogenic,3,2300,2 C,2,3b
+Anthropogenic,3,2300,RCP 8.5,2,3b
+Anthropogenic,4,Current,Current,2,4a
+Anthropogenic,1,Current,Current,3,1.0
+Anthropogenic,2,2100,1.5 C,3,2a
+Anthropogenic,2,2100,2 C,3,2a
+Anthropogenic,2,2100,RCP 8.5,3,2a
+Anthropogenic,2,2300,1.5 C,3,2b
+Anthropogenic,2,2300,2 C,3,2b
+Anthropogenic,2,2300,RCP 8.5,3,2b
+Anthropogenic,3,2100,1.5 C,3,3a
+Anthropogenic,3,2100,2 C,3,3a
+Anthropogenic,3,2100,RCP 8.5,3,3a
+Anthropogenic,3,2300,1.5 C,3,3b
+Anthropogenic,3,2300,2 C,3,3b
+Anthropogenic,3,2300,RCP 8.5,3,3b
+Anthropogenic,4,Current,Current,3,4a
+Anthropogenic,1,Current,Current,4,1.0
+Anthropogenic,2,2100,1.5 C,4,2a
+Anthropogenic,2,2100,2 C,4,2a
+Anthropogenic,2,2100,RCP 8.5,4,2a
+Anthropogenic,2,2300,1.5 C,4,2b
+Anthropogenic,2,2300,2 C,4,2b
+Anthropogenic,2,2300,RCP 8.5,4,2b
+Anthropogenic,3,2100,1.5 C,4,3a
+Anthropogenic,3,2100,2 C,4,3a
+Anthropogenic,3,2100,RCP 8.5,4,3a
+Anthropogenic,3,2300,1.5 C,4,3b
+Anthropogenic,3,2300,2 C,4,3b
+Anthropogenic,3,2300,RCP 8.5,4,3b
+Anthropogenic,4,Current,Current,4,4a
+Anthropogenic,1,Current,Current,5,1.0
+Anthropogenic,2,2100,1.5 C,5,2a
+Anthropogenic,2,2100,2 C,5,2a
+Anthropogenic,2,2100,RCP 8.5,5,2a
+Anthropogenic,2,2300,1.5 C,5,2b
+Anthropogenic,2,2300,2 C,5,2b
+Anthropogenic,2,2300,RCP 8.5,5,2b
+Anthropogenic,3,2100,1.5 C,5,3a
+Anthropogenic,3,2100,2 C,5,3a
+Anthropogenic,3,2100,RCP 8.5,5,3a
+Anthropogenic,3,2300,1.5 C,5,3b
+Anthropogenic,3,2300,2 C,5,3b
+Anthropogenic,3,2300,RCP 8.5,5,3b
+Anthropogenic,4,Current,Current,5,4a
+Anthropogenic,1,Current,Current,6,1.0
+Anthropogenic,2,2100,1.5 C,6,2a
+Anthropogenic,2,2100,2 C,6,2a
+Anthropogenic,2,2100,RCP 8.5,6,2a
+Anthropogenic,2,2300,1.5 C,6,2b
+Anthropogenic,2,2300,2 C,6,2b
+Anthropogenic,2,2300,RCP 8.5,6,2b
+Anthropogenic,3,2100,1.5 C,6,3a
+Anthropogenic,3,2100,2 C,6,3a
+Anthropogenic,3,2100,RCP 8.5,6,3a
+Anthropogenic,3,2300,1.5 C,6,3b
+Anthropogenic,3,2300,2 C,6,3b
+Anthropogenic,3,2300,RCP 8.5,6,3b
+Anthropogenic,4,Current,Current,6,4a
+Anthropogenic,1,Current,Current,7,1.0
+Anthropogenic,2,2100,1.5 C,7,2a
+Anthropogenic,2,2100,2 C,7,2a
+Anthropogenic,2,2100,RCP 8.5,7,2a
+Anthropogenic,2,2300,1.5 C,7,2b
+Anthropogenic,2,2300,2 C,7,2b
+Anthropogenic,2,2300,RCP 8.5,7,2b
+Anthropogenic,3,2100,1.5 C,7,3a
+Anthropogenic,3,2100,2 C,7,3a
+Anthropogenic,3,2100,RCP 8.5,7,3a
+Anthropogenic,3,2300,1.5 C,7,3b
+Anthropogenic,3,2300,2 C,7,3b
+Anthropogenic,3,2300,RCP 8.5,7,3b
+Anthropogenic,4,Current,Current,7,4a
+Anthropogenic,1,Current,Current,8,1.0
+Anthropogenic,2,2100,1.5 C,8,2a
+Anthropogenic,2,2100,2 C,8,2a
+Anthropogenic,2,2100,RCP 8.5,8,2a
+Anthropogenic,2,2300,1.5 C,8,2b
+Anthropogenic,2,2300,2 C,8,2b
+Anthropogenic,2,2300,RCP 8.5,8,2b
+Anthropogenic,3,2100,1.5 C,8,3a
+Anthropogenic,3,2100,2 C,8,3a
+Anthropogenic,3,2100,RCP 8.5,8,3a
+Anthropogenic,3,2300,1.5 C,8,3b
+Anthropogenic,3,2300,2 C,8,3b
+Anthropogenic,3,2300,RCP 8.5,8,3b
+Anthropogenic,4,Current,Current,8,4a
+Anthropogenic,1,Current,Current,9,1.0
+Anthropogenic,2,2100,1.5 C,9,2a
+Anthropogenic,2,2100,2 C,9,2a
+Anthropogenic,2,2100,RCP 8.5,9,2a
+Anthropogenic,2,2300,1.5 C,9,2b
+Anthropogenic,2,2300,2 C,9,2b
+Anthropogenic,2,2300,RCP 8.5,9,2b
+Anthropogenic,3,2100,1.5 C,9,3a
+Anthropogenic,3,2100,2 C,9,3a
+Anthropogenic,3,2100,RCP 8.5,9,3a
+Anthropogenic,3,2300,1.5 C,9,3b
+Anthropogenic,3,2300,2 C,9,3b
+Anthropogenic,3,2300,RCP 8.5,9,3b
+Anthropogenic,4,Current,Current,9,4a
+Anthropogenic,1,Current,Current,10,1.0
+Anthropogenic,2,2100,1.5 C,10,2a
+Anthropogenic,2,2100,2 C,10,2a
+Anthropogenic,2,2100,RCP 8.5,10,2a
+Anthropogenic,2,2300,1.5 C,10,2b
+Anthropogenic,2,2300,2 C,10,2b
+Anthropogenic,2,2300,RCP 8.5,10,2b
+Anthropogenic,3,2100,1.5 C,10,3a
+Anthropogenic,3,2100,2 C,10,3a
+Anthropogenic,3,2100,RCP 8.5,10,3a
+Anthropogenic,3,2300,1.5 C,10,3b
+Anthropogenic,3,2300,2 C,10,3b
+Anthropogenic,3,2300,RCP 8.5,10,3b
+Anthropogenic,4,Current,Current,10,4a
+Biotic,1,Current,Current,1,1.0
+Biotic,2,2100,1.5 C,1,2a
+Biotic,2,2100,2 C,1,2a
+Biotic,2,2100,RCP 8.5,1,2a
+Biotic,2,2300,1.5 C,1,2b
+Biotic,2,2300,2 C,1,2b
+Biotic,2,2300,RCP 8.5,1,2b
+Biotic,3,2100,1.5 C,1,3a
+Biotic,3,2100,2 C,1,3a
+Biotic,3,2100,RCP 8.5,1,3a
+Biotic,3,2300,1.5 C,1,3b
+Biotic,3,2300,2 C,1,3b
+Biotic,3,2300,RCP 8.5,1,3b
+Biotic,4,Current,Current,1,4a
+Biotic,1,Current,Current,2,1.0
+Biotic,2,2100,1.5 C,2,2a
+Biotic,2,2100,2 C,2,2a
+Biotic,2,2100,RCP 8.5,2,2a
+Biotic,2,2300,1.5 C,2,2b
+Biotic,2,2300,2 C,2,2b
+Biotic,2,2300,RCP 8.5,2,2b
+Biotic,3,2100,1.5 C,2,3a
+Biotic,3,2100,2 C,2,3a
+Biotic,3,2100,RCP 8.5,2,3a
+Biotic,3,2300,1.5 C,2,3b
+Biotic,3,2300,2 C,2,3b
+Biotic,3,2300,RCP 8.5,2,3b
+Biotic,4,Current,Current,2,4a
+Biotic,1,Current,Current,3,1.0
+Biotic,2,2100,1.5 C,3,2a
+Biotic,2,2100,2 C,3,2a
+Biotic,2,2100,RCP 8.5,3,2a
+Biotic,2,2300,1.5 C,3,2b
+Biotic,2,2300,2 C,3,2b
+Biotic,2,2300,RCP 8.5,3,2b
+Biotic,3,2100,1.5 C,3,3a
+Biotic,3,2100,2 C,3,3a
+Biotic,3,2100,RCP 8.5,3,3a
+Biotic,3,2300,1.5 C,3,3b
+Biotic,3,2300,2 C,3,3b
+Biotic,3,2300,RCP 8.5,3,3b
+Biotic,4,Current,Current,3,4a
+Biotic,1,Current,Current,4,1.0
+Biotic,2,2100,1.5 C,4,2a
+Biotic,2,2100,2 C,4,2a
+Biotic,2,2100,RCP 8.5,4,2a
+Biotic,2,2300,1.5 C,4,2b
+Biotic,2,2300,2 C,4,2b
+Biotic,2,2300,RCP 8.5,4,2b
+Biotic,3,2100,1.5 C,4,3a
+Biotic,3,2100,2 C,4,3a
+Biotic,3,2100,RCP 8.5,4,3a
+Biotic,3,2300,1.5 C,4,3b
+Biotic,3,2300,2 C,4,3b
+Biotic,3,2300,RCP 8.5,4,3b
+Biotic,4,Current,Current,4,4a
+Biotic,1,Current,Current,5,1.0
+Biotic,2,2100,1.5 C,5,2a
+Biotic,2,2100,2 C,5,2a
+Biotic,2,2100,RCP 8.5,5,2a
+Biotic,2,2300,1.5 C,5,2b
+Biotic,2,2300,2 C,5,2b
+Biotic,2,2300,RCP 8.5,5,2b
+Biotic,3,2100,1.5 C,5,3a
+Biotic,3,2100,2 C,5,3a
+Biotic,3,2100,RCP 8.5,5,3a
+Biotic,3,2300,1.5 C,5,3b
+Biotic,3,2300,2 C,5,3b
+Biotic,3,2300,RCP 8.5,5,3b
+Biotic,4,Current,Current,5,4a
+Biotic,1,Current,Current,6,1.0
+Biotic,2,2100,1.5 C,6,2a
+Biotic,2,2100,2 C,6,2a
+Biotic,2,2100,RCP 8.5,6,2a
+Biotic,2,2300,1.5 C,6,2b
+Biotic,2,2300,2 C,6,2b
+Biotic,2,2300,RCP 8.5,6,2b
+Biotic,3,2100,1.5 C,6,3a
+Biotic,3,2100,2 C,6,3a
+Biotic,3,2100,RCP 8.5,6,3a
+Biotic,3,2300,1.5 C,6,3b
+Biotic,3,2300,2 C,6,3b
+Biotic,3,2300,RCP 8.5,6,3b
+Biotic,4,Current,Current,6,4a
+Biotic,1,Current,Current,7,1.0
+Biotic,2,2100,1.5 C,7,2a
+Biotic,2,2100,2 C,7,2a
+Biotic,2,2100,RCP 8.5,7,2a
+Biotic,2,2300,1.5 C,7,2b
+Biotic,2,2300,2 C,7,2b
+Biotic,2,2300,RCP 8.5,7,2b
+Biotic,3,2100,1.5 C,7,3a
+Biotic,3,2100,2 C,7,3a
+Biotic,3,2100,RCP 8.5,7,3a
+Biotic,3,2300,1.5 C,7,3b
+Biotic,3,2300,2 C,7,3b
+Biotic,3,2300,RCP 8.5,7,3b
+Biotic,4,Current,Current,7,4a
+Biotic,1,Current,Current,8,1.0
+Biotic,2,2100,1.5 C,8,2a
+Biotic,2,2100,2 C,8,2a
+Biotic,2,2100,RCP 8.5,8,2a
+Biotic,2,2300,1.5 C,8,2b
+Biotic,2,2300,2 C,8,2b
+Biotic,2,2300,RCP 8.5,8,2b
+Biotic,3,2100,1.5 C,8,3a
+Biotic,3,2100,2 C,8,3a
+Biotic,3,2100,RCP 8.5,8,3a
+Biotic,3,2300,1.5 C,8,3b
+Biotic,3,2300,2 C,8,3b
+Biotic,3,2300,RCP 8.5,8,3b
+Biotic,4,Current,Current,8,4a
+Biotic,1,Current,Current,9,1.0
+Biotic,2,2100,1.5 C,9,2a
+Biotic,2,2100,2 C,9,2a
+Biotic,2,2100,RCP 8.5,9,2a
+Biotic,2,2300,1.5 C,9,2b
+Biotic,2,2300,2 C,9,2b
+Biotic,2,2300,RCP 8.5,9,2b
+Biotic,3,2100,1.5 C,9,3a
+Biotic,3,2100,2 C,9,3a
+Biotic,3,2100,RCP 8.5,9,3a
+Biotic,3,2300,1.5 C,9,3b
+Biotic,3,2300,2 C,9,3b
+Biotic,3,2300,RCP 8.5,9,3b
+Biotic,4,Current,Current,9,4a
+Biotic,1,Current,Current,10,1.0
+Biotic,2,2100,1.5 C,10,2a
+Biotic,2,2100,2 C,10,2a
+Biotic,2,2100,RCP 8.5,10,2a
+Biotic,2,2300,1.5 C,10,2b
+Biotic,2,2300,2 C,10,2b
+Biotic,2,2300,RCP 8.5,10,2b
+Biotic,3,2100,1.5 C,10,3a
+Biotic,3,2100,2 C,10,3a
+Biotic,3,2100,RCP 8.5,10,3a
+Biotic,3,2300,1.5 C,10,3b
+Biotic,3,2300,2 C,10,3b
+Biotic,3,2300,RCP 8.5,10,3b
+Biotic,4,Current,Current,10,4a
+Biotic,1,Current,Current,11,1.0
+Biotic,2,2100,1.5 C,11,2a
+Biotic,2,2100,2 C,11,2a
+Biotic,2,2100,RCP 8.5,11,2a
+Biotic,2,2300,1.5 C,11,2b
+Biotic,2,2300,2 C,11,2b
+Biotic,2,2300,RCP 8.5,11,2b
+Biotic,3,2100,1.5 C,11,3a
+Biotic,3,2100,2 C,11,3a
+Biotic,3,2100,RCP 8.5,11,3a
+Biotic,3,2300,1.5 C,11,3b
+Biotic,3,2300,2 C,11,3b
+Biotic,3,2300,RCP 8.5,11,3b
+Biotic,4,Current,Current,11,4a
+Biotic,1,Current,Current,12,1.0
+Biotic,2,2100,1.5 C,12,2a
+Biotic,2,2100,2 C,12,2a
+Biotic,2,2100,RCP 8.5,12,2a
+Biotic,2,2300,1.5 C,12,2b
+Biotic,2,2300,2 C,12,2b
+Biotic,2,2300,RCP 8.5,12,2b
+Biotic,3,2100,1.5 C,12,3a
+Biotic,3,2100,2 C,12,3a
+Biotic,3,2100,RCP 8.5,12,3a
+Biotic,3,2300,1.5 C,12,3b
+Biotic,3,2300,2 C,12,3b
+Biotic,3,2300,RCP 8.5,12,3b
+Biotic,4,Current,Current,12,4a
+Biotic,1,Current,Current,13,1.0
+Biotic,2,2100,1.5 C,13,2a
+Biotic,2,2100,2 C,13,2a
+Biotic,2,2100,RCP 8.5,13,2a
+Biotic,2,2300,1.5 C,13,2b
+Biotic,2,2300,2 C,13,2b
+Biotic,2,2300,RCP 8.5,13,2b
+Biotic,3,2100,1.5 C,13,3a
+Biotic,3,2100,2 C,13,3a
+Biotic,3,2100,RCP 8.5,13,3a
+Biotic,3,2300,1.5 C,13,3b
+Biotic,3,2300,2 C,13,3b
+Biotic,3,2300,RCP 8.5,13,3b
+Biotic,4,Current,Current,13,4a
+Fire,1,Current,Current,1,1.0
+Fire,2,2100,1.5 C,1,2a
+Fire,2,2100,2 C,1,2a
+Fire,2,2100,RCP 8.5,1,2a
+Fire,2,2300,1.5 C,1,2b
+Fire,2,2300,2 C,1,2b
+Fire,2,2300,RCP 8.5,1,2b
+Fire,3,2100,1.5 C,1,3a
+Fire,3,2100,2 C,1,3a
+Fire,3,2100,RCP 8.5,1,3a
+Fire,3,2300,1.5 C,1,3b
+Fire,3,2300,2 C,1,3b
+Fire,3,2300,RCP 8.5,1,3b
+Fire,4,Current,Current,1,4a
+Fire,1,Current,Current,2,1.0
+Fire,2,2100,1.5 C,2,2a
+Fire,2,2100,2 C,2,2a
+Fire,2,2100,RCP 8.5,2,2a
+Fire,2,2300,1.5 C,2,2b
+Fire,2,2300,2 C,2,2b
+Fire,2,2300,RCP 8.5,2,2b
+Fire,3,2100,1.5 C,2,3a
+Fire,3,2100,2 C,2,3a
+Fire,3,2100,RCP 8.5,2,3a
+Fire,3,2300,1.5 C,2,3b
+Fire,3,2300,2 C,2,3b
+Fire,3,2300,RCP 8.5,2,3b
+Fire,4,Current,Current,2,4a
+Fire,1,Current,Current,3,1.0
+Fire,2,2100,1.5 C,3,2a
+Fire,2,2100,2 C,3,2a
+Fire,2,2100,RCP 8.5,3,2a
+Fire,2,2300,1.5 C,3,2b
+Fire,2,2300,2 C,3,2b
+Fire,2,2300,RCP 8.5,3,2b
+Fire,3,2100,1.5 C,3,3a
+Fire,3,2100,2 C,3,3a
+Fire,3,2100,RCP 8.5,3,3a
+Fire,3,2300,1.5 C,3,3b
+Fire,3,2300,2 C,3,3b
+Fire,3,2300,RCP 8.5,3,3b
+Fire,4,Current,Current,3,4a
+Fire,1,Current,Current,4,1.0
+Fire,2,2100,1.5 C,4,2a
+Fire,2,2100,2 C,4,2a
+Fire,2,2100,RCP 8.5,4,2a
+Fire,2,2300,1.5 C,4,2b
+Fire,2,2300,2 C,4,2b
+Fire,2,2300,RCP 8.5,4,2b
+Fire,3,2100,1.5 C,4,3a
+Fire,3,2100,2 C,4,3a
+Fire,3,2100,RCP 8.5,4,3a
+Fire,3,2300,1.5 C,4,3b
+Fire,3,2300,2 C,4,3b
+Fire,3,2300,RCP 8.5,4,3b
+Fire,4,Current,Current,4,4a
+Fire,1,Current,Current,5,1.0
+Fire,2,2100,1.5 C,5,2a
+Fire,2,2100,2 C,5,2a
+Fire,2,2100,RCP 8.5,5,2a
+Fire,2,2300,1.5 C,5,2b
+Fire,2,2300,2 C,5,2b
+Fire,2,2300,RCP 8.5,5,2b
+Fire,3,2100,1.5 C,5,3a
+Fire,3,2100,2 C,5,3a
+Fire,3,2100,RCP 8.5,5,3a
+Fire,3,2300,1.5 C,5,3b
+Fire,3,2300,2 C,5,3b
+Fire,3,2300,RCP 8.5,5,3b
+Fire,4,Current,Current,5,4a
+Fire,1,Current,Current,6,1.0
+Fire,2,2100,1.5 C,6,2a
+Fire,2,2100,2 C,6,2a
+Fire,2,2100,RCP 8.5,6,2a
+Fire,2,2300,1.5 C,6,2b
+Fire,2,2300,2 C,6,2b
+Fire,2,2300,RCP 8.5,6,2b
+Fire,3,2100,1.5 C,6,3a
+Fire,3,2100,2 C,6,3a
+Fire,3,2100,RCP 8.5,6,3a
+Fire,3,2300,1.5 C,6,3b
+Fire,3,2300,2 C,6,3b
+Fire,3,2300,RCP 8.5,6,3b
+Fire,4,Current,Current,6,4a
+Fire,1,Current,Current,7,1.0
+Fire,2,2100,1.5 C,7,2a
+Fire,2,2100,2 C,7,2a
+Fire,2,2100,RCP 8.5,7,2a
+Fire,2,2300,1.5 C,7,2b
+Fire,2,2300,2 C,7,2b
+Fire,2,2300,RCP 8.5,7,2b
+Fire,3,2100,1.5 C,7,3a
+Fire,3,2100,2 C,7,3a
+Fire,3,2100,RCP 8.5,7,3a
+Fire,3,2300,1.5 C,7,3b
+Fire,3,2300,2 C,7,3b
+Fire,3,2300,RCP 8.5,7,3b
+Fire,4,Current,Current,7,4a
+Fire,1,Current,Current,8,1.0
+Fire,2,2100,1.5 C,8,2a
+Fire,2,2100,2 C,8,2a
+Fire,2,2100,RCP 8.5,8,2a
+Fire,2,2300,1.5 C,8,2b
+Fire,2,2300,2 C,8,2b
+Fire,2,2300,RCP 8.5,8,2b
+Fire,3,2100,1.5 C,8,3a
+Fire,3,2100,2 C,8,3a
+Fire,3,2100,RCP 8.5,8,3a
+Fire,3,2300,1.5 C,8,3b
+Fire,3,2300,2 C,8,3b
+Fire,3,2300,RCP 8.5,8,3b
+Fire,4,Current,Current,8,4a
+Fire,1,Current,Current,9,1.0
+Fire,2,2100,1.5 C,9,2a
+Fire,2,2100,2 C,9,2a
+Fire,2,2100,RCP 8.5,9,2a
+Fire,2,2300,1.5 C,9,2b
+Fire,2,2300,2 C,9,2b
+Fire,2,2300,RCP 8.5,9,2b
+Fire,3,2100,1.5 C,9,3a
+Fire,3,2100,2 C,9,3a
+Fire,3,2100,RCP 8.5,9,3a
+Fire,3,2300,1.5 C,9,3b
+Fire,3,2300,2 C,9,3b
+Fire,3,2300,RCP 8.5,9,3b
+Fire,4,Current,Current,9,4a
+Fire,1,Current,Current,10,1.0
+Fire,2,2100,1.5 C,10,2a
+Fire,2,2100,2 C,10,2a
+Fire,2,2100,RCP 8.5,10,2a
+Fire,2,2300,1.5 C,10,2b
+Fire,2,2300,2 C,10,2b
+Fire,2,2300,RCP 8.5,10,2b
+Fire,3,2100,1.5 C,10,3a
+Fire,3,2100,2 C,10,3a
+Fire,3,2100,RCP 8.5,10,3a
+Fire,3,2300,1.5 C,10,3b
+Fire,3,2300,2 C,10,3b
+Fire,3,2300,RCP 8.5,10,3b
+Fire,4,Current,Current,10,4a
+Fire,1,Current,Current,11,1.0
+Fire,2,2100,1.5 C,11,2a
+Fire,2,2100,2 C,11,2a
+Fire,2,2100,RCP 8.5,11,2a
+Fire,2,2300,1.5 C,11,2b
+Fire,2,2300,2 C,11,2b
+Fire,2,2300,RCP 8.5,11,2b
+Fire,3,2100,1.5 C,11,3a
+Fire,3,2100,2 C,11,3a
+Fire,3,2100,RCP 8.5,11,3a
+Fire,3,2300,1.5 C,11,3b
+Fire,3,2300,2 C,11,3b
+Fire,3,2300,RCP 8.5,11,3b
+Fire,4,Current,Current,11,4a
+Fire,1,Current,Current,12,1.0
+Fire,2,2100,1.5 C,12,2a
+Fire,2,2100,2 C,12,2a
+Fire,2,2100,RCP 8.5,12,2a
+Fire,2,2300,1.5 C,12,2b
+Fire,2,2300,2 C,12,2b
+Fire,2,2300,RCP 8.5,12,2b
+Fire,3,2100,1.5 C,12,3a
+Fire,3,2100,2 C,12,3a
+Fire,3,2100,RCP 8.5,12,3a
+Fire,3,2300,1.5 C,12,3b
+Fire,3,2300,2 C,12,3b
+Fire,3,2300,RCP 8.5,12,3b
+Fire,4,Current,Current,12,4a
+Fire,1,Current,Current,13,1.0
+Fire,2,2100,1.5 C,13,2a
+Fire,2,2100,2 C,13,2a
+Fire,2,2100,RCP 8.5,13,2a
+Fire,2,2300,1.5 C,13,2b
+Fire,2,2300,2 C,13,2b
+Fire,2,2300,RCP 8.5,13,2b
+Fire,3,2100,1.5 C,13,3a
+Fire,3,2100,2 C,13,3a
+Fire,3,2100,RCP 8.5,13,3a
+Fire,3,2300,1.5 C,13,3b
+Fire,3,2300,2 C,13,3b
+Fire,3,2300,RCP 8.5,13,3b
+Fire,4,Current,Current,13,4a
+Fire,1,Current,Current,14,1.0
+Fire,2,2100,1.5 C,14,2a
+Fire,2,2100,2 C,14,2a
+Fire,2,2100,RCP 8.5,14,2a
+Fire,2,2300,1.5 C,14,2b
+Fire,2,2300,2 C,14,2b
+Fire,2,2300,RCP 8.5,14,2b
+Fire,3,2100,1.5 C,14,3a
+Fire,3,2100,2 C,14,3a
+Fire,3,2100,RCP 8.5,14,3a
+Fire,3,2300,1.5 C,14,3b
+Fire,3,2300,2 C,14,3b
+Fire,3,2300,RCP 8.5,14,3b
+Fire,4,Current,Current,14,4a
+Fire,1,Current,Current,15,1.0
+Fire,2,2100,1.5 C,15,2a
+Fire,2,2100,2 C,15,2a
+Fire,2,2100,RCP 8.5,15,2a
+Fire,2,2300,1.5 C,15,2b
+Fire,2,2300,2 C,15,2b
+Fire,2,2300,RCP 8.5,15,2b
+Fire,3,2100,1.5 C,15,3a
+Fire,3,2100,2 C,15,3a
+Fire,3,2100,RCP 8.5,15,3a
+Fire,3,2300,1.5 C,15,3b
+Fire,3,2300,2 C,15,3b
+Fire,3,2300,RCP 8.5,15,3b
+Fire,4,Current,Current,15,4a
+Fire,1,Current,Current,16,1.0
+Fire,2,2100,1.5 C,16,2a
+Fire,2,2100,2 C,16,2a
+Fire,2,2100,RCP 8.5,16,2a
+Fire,2,2300,1.5 C,16,2b
+Fire,2,2300,2 C,16,2b
+Fire,2,2300,RCP 8.5,16,2b
+Fire,3,2100,1.5 C,16,3a
+Fire,3,2100,2 C,16,3a
+Fire,3,2100,RCP 8.5,16,3a
+Fire,3,2300,1.5 C,16,3b
+Fire,3,2300,2 C,16,3b
+Fire,3,2300,RCP 8.5,16,3b
+Fire,4,Current,Current,16,4a
+Fire,1,Current,Current,17,1.0
+Fire,2,2100,1.5 C,17,2a
+Fire,2,2100,2 C,17,2a
+Fire,2,2100,RCP 8.5,17,2a
+Fire,2,2300,1.5 C,17,2b
+Fire,2,2300,2 C,17,2b
+Fire,2,2300,RCP 8.5,17,2b
+Fire,3,2100,1.5 C,17,3a
+Fire,3,2100,2 C,17,3a
+Fire,3,2100,RCP 8.5,17,3a
+Fire,3,2300,1.5 C,17,3b
+Fire,3,2300,2 C,17,3b
+Fire,3,2300,RCP 8.5,17,3b
+Fire,4,Current,Current,17,4a
+Fire,1,Current,Current,18,1.0
+Fire,2,2100,1.5 C,18,2a
+Fire,2,2100,2 C,18,2a
+Fire,2,2100,RCP 8.5,18,2a
+Fire,2,2300,1.5 C,18,2b
+Fire,2,2300,2 C,18,2b
+Fire,2,2300,RCP 8.5,18,2b
+Fire,3,2100,1.5 C,18,3a
+Fire,3,2100,2 C,18,3a
+Fire,3,2100,RCP 8.5,18,3a
+Fire,3,2300,1.5 C,18,3b
+Fire,3,2300,2 C,18,3b
+Fire,3,2300,RCP 8.5,18,3b
+Fire,4,Current,Current,18,4a
+Fire,1,Current,Current,19,1.0
+Fire,2,2100,1.5 C,19,2a
+Fire,2,2100,2 C,19,2a
+Fire,2,2100,RCP 8.5,19,2a
+Fire,2,2300,1.5 C,19,2b
+Fire,2,2300,2 C,19,2b
+Fire,2,2300,RCP 8.5,19,2b
+Fire,3,2100,1.5 C,19,3a
+Fire,3,2100,2 C,19,3a
+Fire,3,2100,RCP 8.5,19,3a
+Fire,3,2300,1.5 C,19,3b
+Fire,3,2300,2 C,19,3b
+Fire,3,2300,RCP 8.5,19,3b
+Fire,4,Current,Current,19,4a
+Fire,1,Current,Current,20,1.0
+Fire,2,2100,1.5 C,20,2a
+Fire,2,2100,2 C,20,2a
+Fire,2,2100,RCP 8.5,20,2a
+Fire,2,2300,1.5 C,20,2b
+Fire,2,2300,2 C,20,2b
+Fire,2,2300,RCP 8.5,20,2b
+Fire,3,2100,1.5 C,20,3a
+Fire,3,2100,2 C,20,3a
+Fire,3,2100,RCP 8.5,20,3a
+Fire,3,2300,1.5 C,20,3b
+Fire,3,2300,2 C,20,3b
+Fire,3,2300,RCP 8.5,20,3b
+Fire,4,Current,Current,20,4a
+Fire,1,Current,Current,21,1.0
+Fire,2,2100,1.5 C,21,2a
+Fire,2,2100,2 C,21,2a
+Fire,2,2100,RCP 8.5,21,2a
+Fire,2,2300,1.5 C,21,2b
+Fire,2,2300,2 C,21,2b
+Fire,2,2300,RCP 8.5,21,2b
+Fire,3,2100,1.5 C,21,3a
+Fire,3,2100,2 C,21,3a
+Fire,3,2100,RCP 8.5,21,3a
+Fire,3,2300,1.5 C,21,3b
+Fire,3,2300,2 C,21,3b
+Fire,3,2300,RCP 8.5,21,3b
+Fire,4,Current,Current,21,4a
+Permafrost,1,Current,Current,1,1.0
+Permafrost,2,2100,1.5 C,1,2a
+Permafrost,2,2100,2 C,1,2a
+Permafrost,2,2100,RCP 8.5,1,2a
+Permafrost,2,2300,1.5 C,1,2b
+Permafrost,2,2300,2 C,1,2b
+Permafrost,2,2300,RCP 8.5,1,2b
+Permafrost,3,2100,1.5 C,1,3a
+Permafrost,3,2100,2 C,1,3a
+Permafrost,3,2100,RCP 8.5,1,3a
+Permafrost,3,2300,1.5 C,1,3b
+Permafrost,3,2300,2 C,1,3b
+Permafrost,3,2300,RCP 8.5,1,3b
+Permafrost,4,Current,Current,1,4a
+Permafrost,1,Current,Current,2,1.0
+Permafrost,2,2100,1.5 C,2,2a
+Permafrost,2,2100,2 C,2,2a
+Permafrost,2,2100,RCP 8.5,2,2a
+Permafrost,2,2300,1.5 C,2,2b
+Permafrost,2,2300,2 C,2,2b
+Permafrost,2,2300,RCP 8.5,2,2b
+Permafrost,3,2100,1.5 C,2,3a
+Permafrost,3,2100,2 C,2,3a
+Permafrost,3,2100,RCP 8.5,2,3a
+Permafrost,3,2300,1.5 C,2,3b
+Permafrost,3,2300,2 C,2,3b
+Permafrost,3,2300,RCP 8.5,2,3b
+Permafrost,4,Current,Current,2,4a
+Permafrost,1,Current,Current,3,1.0
+Permafrost,2,2100,1.5 C,3,2a
+Permafrost,2,2100,2 C,3,2a
+Permafrost,2,2100,RCP 8.5,3,2a
+Permafrost,2,2300,1.5 C,3,2b
+Permafrost,2,2300,2 C,3,2b
+Permafrost,2,2300,RCP 8.5,3,2b
+Permafrost,3,2100,1.5 C,3,3a
+Permafrost,3,2100,2 C,3,3a
+Permafrost,3,2100,RCP 8.5,3,3a
+Permafrost,3,2300,1.5 C,3,3b
+Permafrost,3,2300,2 C,3,3b
+Permafrost,3,2300,RCP 8.5,3,3b
+Permafrost,4,Current,Current,3,4a
+Permafrost,1,Current,Current,4,1.0
+Permafrost,2,2100,1.5 C,4,2a
+Permafrost,2,2100,2 C,4,2a
+Permafrost,2,2100,RCP 8.5,4,2a
+Permafrost,2,2300,1.5 C,4,2b
+Permafrost,2,2300,2 C,4,2b
+Permafrost,2,2300,RCP 8.5,4,2b
+Permafrost,3,2100,1.5 C,4,3a
+Permafrost,3,2100,2 C,4,3a
+Permafrost,3,2100,RCP 8.5,4,3a
+Permafrost,3,2300,1.5 C,4,3b
+Permafrost,3,2300,2 C,4,3b
+Permafrost,3,2300,RCP 8.5,4,3b
+Permafrost,4,Current,Current,4,4a
+Permafrost,1,Current,Current,5,1.0
+Permafrost,2,2100,1.5 C,5,2a
+Permafrost,2,2100,2 C,5,2a
+Permafrost,2,2100,RCP 8.5,5,2a
+Permafrost,2,2300,1.5 C,5,2b
+Permafrost,2,2300,2 C,5,2b
+Permafrost,2,2300,RCP 8.5,5,2b
+Permafrost,3,2100,1.5 C,5,3a
+Permafrost,3,2100,2 C,5,3a
+Permafrost,3,2100,RCP 8.5,5,3a
+Permafrost,3,2300,1.5 C,5,3b
+Permafrost,3,2300,2 C,5,3b
+Permafrost,3,2300,RCP 8.5,5,3b
+Permafrost,4,Current,Current,5,4a
+Permafrost,1,Current,Current,6,1.0
+Permafrost,2,2100,1.5 C,6,2a
+Permafrost,2,2100,2 C,6,2a
+Permafrost,2,2100,RCP 8.5,6,2a
+Permafrost,2,2300,1.5 C,6,2b
+Permafrost,2,2300,2 C,6,2b
+Permafrost,2,2300,RCP 8.5,6,2b
+Permafrost,3,2100,1.5 C,6,3a
+Permafrost,3,2100,2 C,6,3a
+Permafrost,3,2100,RCP 8.5,6,3a
+Permafrost,3,2300,1.5 C,6,3b
+Permafrost,3,2300,2 C,6,3b
+Permafrost,3,2300,RCP 8.5,6,3b
+Permafrost,4,Current,Current,6,4a
+Permafrost,1,Current,Current,7,1.0
+Permafrost,2,2100,1.5 C,7,2a
+Permafrost,2,2100,2 C,7,2a
+Permafrost,2,2100,RCP 8.5,7,2a
+Permafrost,2,2300,1.5 C,7,2b
+Permafrost,2,2300,2 C,7,2b
+Permafrost,2,2300,RCP 8.5,7,2b
+Permafrost,3,2100,1.5 C,7,3a
+Permafrost,3,2100,2 C,7,3a
+Permafrost,3,2100,RCP 8.5,7,3a
+Permafrost,3,2300,1.5 C,7,3b
+Permafrost,3,2300,2 C,7,3b
+Permafrost,3,2300,RCP 8.5,7,3b
+Permafrost,4,Current,Current,7,4a
+Permafrost,1,Current,Current,8,1.0
+Permafrost,2,2100,1.5 C,8,2a
+Permafrost,2,2100,2 C,8,2a
+Permafrost,2,2100,RCP 8.5,8,2a
+Permafrost,2,2300,1.5 C,8,2b
+Permafrost,2,2300,2 C,8,2b
+Permafrost,2,2300,RCP 8.5,8,2b
+Permafrost,3,2100,1.5 C,8,3a
+Permafrost,3,2100,2 C,8,3a
+Permafrost,3,2100,RCP 8.5,8,3a
+Permafrost,3,2300,1.5 C,8,3b
+Permafrost,3,2300,2 C,8,3b
+Permafrost,3,2300,RCP 8.5,8,3b
+Permafrost,4,Current,Current,8,4a
+Permafrost,1,Current,Current,9,1.0
+Permafrost,2,2100,1.5 C,9,2a
+Permafrost,2,2100,2 C,9,2a
+Permafrost,2,2100,RCP 8.5,9,2a
+Permafrost,2,2300,1.5 C,9,2b
+Permafrost,2,2300,2 C,9,2b
+Permafrost,2,2300,RCP 8.5,9,2b
+Permafrost,3,2100,1.5 C,9,3a
+Permafrost,3,2100,2 C,9,3a
+Permafrost,3,2100,RCP 8.5,9,3a
+Permafrost,3,2300,1.5 C,9,3b
+Permafrost,3,2300,2 C,9,3b
+Permafrost,3,2300,RCP 8.5,9,3b
+Permafrost,4,Current,Current,9,4a
+Permafrost,1,Current,Current,10,1.0
+Permafrost,2,2100,1.5 C,10,2a
+Permafrost,2,2100,2 C,10,2a
+Permafrost,2,2100,RCP 8.5,10,2a
+Permafrost,2,2300,1.5 C,10,2b
+Permafrost,2,2300,2 C,10,2b
+Permafrost,2,2300,RCP 8.5,10,2b
+Permafrost,3,2100,1.5 C,10,3a
+Permafrost,3,2100,2 C,10,3a
+Permafrost,3,2100,RCP 8.5,10,3a
+Permafrost,3,2300,1.5 C,10,3b
+Permafrost,3,2300,2 C,10,3b
+Permafrost,3,2300,RCP 8.5,10,3b
+Permafrost,4,Current,Current,10,4a
+Permafrost,1,Current,Current,11,1.0
+Permafrost,2,2100,1.5 C,11,2a
+Permafrost,2,2100,2 C,11,2a
+Permafrost,2,2100,RCP 8.5,11,2a
+Permafrost,2,2300,1.5 C,11,2b
+Permafrost,2,2300,2 C,11,2b
+Permafrost,2,2300,RCP 8.5,11,2b
+Permafrost,3,2100,1.5 C,11,3a
+Permafrost,3,2100,2 C,11,3a
+Permafrost,3,2100,RCP 8.5,11,3a
+Permafrost,3,2300,1.5 C,11,3b
+Permafrost,3,2300,2 C,11,3b
+Permafrost,3,2300,RCP 8.5,11,3b
+Permafrost,4,Current,Current,11,4a
+Permafrost,1,Current,Current,12,1.0
+Permafrost,2,2100,1.5 C,12,2a
+Permafrost,2,2100,2 C,12,2a
+Permafrost,2,2100,RCP 8.5,12,2a
+Permafrost,2,2300,1.5 C,12,2b
+Permafrost,2,2300,2 C,12,2b
+Permafrost,2,2300,RCP 8.5,12,2b
+Permafrost,3,2100,1.5 C,12,3a
+Permafrost,3,2100,2 C,12,3a
+Permafrost,3,2100,RCP 8.5,12,3a
+Permafrost,3,2300,1.5 C,12,3b
+Permafrost,3,2300,2 C,12,3b
+Permafrost,3,2300,RCP 8.5,12,3b
+Permafrost,4,Current,Current,12,4a
+Permafrost,1,Current,Current,13,1.0
+Permafrost,2,2100,1.5 C,13,2a
+Permafrost,2,2100,2 C,13,2a
+Permafrost,2,2100,RCP 8.5,13,2a
+Permafrost,2,2300,1.5 C,13,2b
+Permafrost,2,2300,2 C,13,2b
+Permafrost,2,2300,RCP 8.5,13,2b
+Permafrost,3,2100,1.5 C,13,3a
+Permafrost,3,2100,2 C,13,3a
+Permafrost,3,2100,RCP 8.5,13,3a
+Permafrost,3,2300,1.5 C,13,3b
+Permafrost,3,2300,2 C,13,3b
+Permafrost,3,2300,RCP 8.5,13,3b
+Permafrost,4,Current,Current,13,4a
+Permafrost,1,Current,Current,14,1.0
+Permafrost,2,2100,1.5 C,14,2a
+Permafrost,2,2100,2 C,14,2a
+Permafrost,2,2100,RCP 8.5,14,2a
+Permafrost,2,2300,1.5 C,14,2b
+Permafrost,2,2300,2 C,14,2b
+Permafrost,2,2300,RCP 8.5,14,2b
+Permafrost,3,2100,1.5 C,14,3a
+Permafrost,3,2100,2 C,14,3a
+Permafrost,3,2100,RCP 8.5,14,3a
+Permafrost,3,2300,1.5 C,14,3b
+Permafrost,3,2300,2 C,14,3b
+Permafrost,3,2300,RCP 8.5,14,3b
+Permafrost,4,Current,Current,14,4a
+Permafrost,1,Current,Current,15,1.0
+Permafrost,2,2100,1.5 C,15,2a
+Permafrost,2,2100,2 C,15,2a
+Permafrost,2,2100,RCP 8.5,15,2a
+Permafrost,2,2300,1.5 C,15,2b
+Permafrost,2,2300,2 C,15,2b
+Permafrost,2,2300,RCP 8.5,15,2b
+Permafrost,3,2100,1.5 C,15,3a
+Permafrost,3,2100,2 C,15,3a
+Permafrost,3,2100,RCP 8.5,15,3a
+Permafrost,3,2300,1.5 C,15,3b
+Permafrost,3,2300,2 C,15,3b
+Permafrost,3,2300,RCP 8.5,15,3b
+Permafrost,4,Current,Current,15,4a
+Permafrost,1,Current,Current,16,1.0
+Permafrost,2,2100,1.5 C,16,2a
+Permafrost,2,2100,2 C,16,2a
+Permafrost,2,2100,RCP 8.5,16,2a
+Permafrost,2,2300,1.5 C,16,2b
+Permafrost,2,2300,2 C,16,2b
+Permafrost,2,2300,RCP 8.5,16,2b
+Permafrost,3,2100,1.5 C,16,3a
+Permafrost,3,2100,2 C,16,3a
+Permafrost,3,2100,RCP 8.5,16,3a
+Permafrost,3,2300,1.5 C,16,3b
+Permafrost,3,2300,2 C,16,3b
+Permafrost,3,2300,RCP 8.5,16,3b
+Permafrost,4,Current,Current,16,4a
+Permafrost,1,Current,Current,17,1.0
+Permafrost,2,2100,1.5 C,17,2a
+Permafrost,2,2100,2 C,17,2a
+Permafrost,2,2100,RCP 8.5,17,2a
+Permafrost,2,2300,1.5 C,17,2b
+Permafrost,2,2300,2 C,17,2b
+Permafrost,2,2300,RCP 8.5,17,2b
+Permafrost,3,2100,1.5 C,17,3a
+Permafrost,3,2100,2 C,17,3a
+Permafrost,3,2100,RCP 8.5,17,3a
+Permafrost,3,2300,1.5 C,17,3b
+Permafrost,3,2300,2 C,17,3b
+Permafrost,3,2300,RCP 8.5,17,3b
+Permafrost,4,Current,Current,17,4a
+Permafrost,1,Current,Current,18,1.0
+Permafrost,2,2100,1.5 C,18,2a
+Permafrost,2,2100,2 C,18,2a
+Permafrost,2,2100,RCP 8.5,18,2a
+Permafrost,2,2300,1.5 C,18,2b
+Permafrost,2,2300,2 C,18,2b
+Permafrost,2,2300,RCP 8.5,18,2b
+Permafrost,3,2100,1.5 C,18,3a
+Permafrost,3,2100,2 C,18,3a
+Permafrost,3,2100,RCP 8.5,18,3a
+Permafrost,3,2300,1.5 C,18,3b
+Permafrost,3,2300,2 C,18,3b
+Permafrost,3,2300,RCP 8.5,18,3b
+Permafrost,4,Current,Current,18,4a
+Permafrost,1,Current,Current,19,1.0
+Permafrost,2,2100,1.5 C,19,2a
+Permafrost,2,2100,2 C,19,2a
+Permafrost,2,2100,RCP 8.5,19,2a
+Permafrost,2,2300,1.5 C,19,2b
+Permafrost,2,2300,2 C,19,2b
+Permafrost,2,2300,RCP 8.5,19,2b
+Permafrost,3,2100,1.5 C,19,3a
+Permafrost,3,2100,2 C,19,3a
+Permafrost,3,2100,RCP 8.5,19,3a
+Permafrost,3,2300,1.5 C,19,3b
+Permafrost,3,2300,2 C,19,3b
+Permafrost,3,2300,RCP 8.5,19,3b
+Permafrost,4,Current,Current,19,4a
+Permafrost,1,Current,Current,20,1.0
+Permafrost,2,2100,1.5 C,20,2a
+Permafrost,2,2100,2 C,20,2a
+Permafrost,2,2100,RCP 8.5,20,2a
+Permafrost,2,2300,1.5 C,20,2b
+Permafrost,2,2300,2 C,20,2b
+Permafrost,2,2300,RCP 8.5,20,2b
+Permafrost,3,2100,1.5 C,20,3a
+Permafrost,3,2100,2 C,20,3a
+Permafrost,3,2100,RCP 8.5,20,3a
+Permafrost,3,2300,1.5 C,20,3b
+Permafrost,3,2300,2 C,20,3b
+Permafrost,3,2300,RCP 8.5,20,3b
+Permafrost,4,Current,Current,20,4a
+Permafrost,1,Current,Current,21,1.0
+Permafrost,2,2100,1.5 C,21,2a
+Permafrost,2,2100,2 C,21,2a
+Permafrost,2,2100,RCP 8.5,21,2a
+Permafrost,2,2300,1.5 C,21,2b
+Permafrost,2,2300,2 C,21,2b
+Permafrost,2,2300,RCP 8.5,21,2b
+Permafrost,3,2100,1.5 C,21,3a
+Permafrost,3,2100,2 C,21,3a
+Permafrost,3,2100,RCP 8.5,21,3a
+Permafrost,3,2300,1.5 C,21,3b
+Permafrost,3,2300,2 C,21,3b
+Permafrost,3,2300,RCP 8.5,21,3b
+Permafrost,4,Current,Current,21,4a
+Permafrost,1,Current,Current,22,1.0
+Permafrost,2,2100,1.5 C,22,2a
+Permafrost,2,2100,2 C,22,2a
+Permafrost,2,2100,RCP 8.5,22,2a
+Permafrost,2,2300,1.5 C,22,2b
+Permafrost,2,2300,2 C,22,2b
+Permafrost,2,2300,RCP 8.5,22,2b
+Permafrost,3,2100,1.5 C,22,3a
+Permafrost,3,2100,2 C,22,3a
+Permafrost,3,2100,RCP 8.5,22,3a
+Permafrost,3,2300,1.5 C,22,3b
+Permafrost,3,2300,2 C,22,3b
+Permafrost,3,2300,RCP 8.5,22,3b
+Permafrost,4,Current,Current,22,4a
+Weather,1,Current,Current,1,1.0
+Weather,2,2100,1.5 C,1,2a
+Weather,2,2100,2 C,1,2a
+Weather,2,2100,RCP 8.5,1,2a
+Weather,2,2300,1.5 C,1,2b
+Weather,2,2300,2 C,1,2b
+Weather,2,2300,RCP 8.5,1,2b
+Weather,3,2100,1.5 C,1,3a
+Weather,3,2100,2 C,1,3a
+Weather,3,2100,RCP 8.5,1,3a
+Weather,3,2300,1.5 C,1,3b
+Weather,3,2300,2 C,1,3b
+Weather,3,2300,RCP 8.5,1,3b
+Weather,4,Current,Current,1,4a
+Weather,1,Current,Current,2,1.0
+Weather,2,2100,1.5 C,2,2a
+Weather,2,2100,2 C,2,2a
+Weather,2,2100,RCP 8.5,2,2a
+Weather,2,2300,1.5 C,2,2b
+Weather,2,2300,2 C,2,2b
+Weather,2,2300,RCP 8.5,2,2b
+Weather,3,2100,1.5 C,2,3a
+Weather,3,2100,2 C,2,3a
+Weather,3,2100,RCP 8.5,2,3a
+Weather,3,2300,1.5 C,2,3b
+Weather,3,2300,2 C,2,3b
+Weather,3,2300,RCP 8.5,2,3b
+Weather,4,Current,Current,2,4a
+Weather,1,Current,Current,3,1.0
+Weather,2,2100,1.5 C,3,2a
+Weather,2,2100,2 C,3,2a
+Weather,2,2100,RCP 8.5,3,2a
+Weather,2,2300,1.5 C,3,2b
+Weather,2,2300,2 C,3,2b
+Weather,2,2300,RCP 8.5,3,2b
+Weather,3,2100,1.5 C,3,3a
+Weather,3,2100,2 C,3,3a
+Weather,3,2100,RCP 8.5,3,3a
+Weather,3,2300,1.5 C,3,3b
+Weather,3,2300,2 C,3,3b
+Weather,3,2300,RCP 8.5,3,3b
+Weather,4,Current,Current,3,4a
+Weather,1,Current,Current,4,1.0
+Weather,2,2100,1.5 C,4,2a
+Weather,2,2100,2 C,4,2a
+Weather,2,2100,RCP 8.5,4,2a
+Weather,2,2300,1.5 C,4,2b
+Weather,2,2300,2 C,4,2b
+Weather,2,2300,RCP 8.5,4,2b
+Weather,3,2100,1.5 C,4,3a
+Weather,3,2100,2 C,4,3a
+Weather,3,2100,RCP 8.5,4,3a
+Weather,3,2300,1.5 C,4,3b
+Weather,3,2300,2 C,4,3b
+Weather,3,2300,RCP 8.5,4,3b
+Weather,4,Current,Current,4,4a
+Weather,1,Current,Current,5,1.0
+Weather,2,2100,1.5 C,5,2a
+Weather,2,2100,2 C,5,2a
+Weather,2,2100,RCP 8.5,5,2a
+Weather,2,2300,1.5 C,5,2b
+Weather,2,2300,2 C,5,2b
+Weather,2,2300,RCP 8.5,5,2b
+Weather,3,2100,1.5 C,5,3a
+Weather,3,2100,2 C,5,3a
+Weather,3,2100,RCP 8.5,5,3a
+Weather,3,2300,1.5 C,5,3b
+Weather,3,2300,2 C,5,3b
+Weather,3,2300,RCP 8.5,5,3b
+Weather,4,Current,Current,5,4a
+Weather,1,Current,Current,6,1.0
+Weather,2,2100,1.5 C,6,2a
+Weather,2,2100,2 C,6,2a
+Weather,2,2100,RCP 8.5,6,2a
+Weather,2,2300,1.5 C,6,2b
+Weather,2,2300,2 C,6,2b
+Weather,2,2300,RCP 8.5,6,2b
+Weather,3,2100,1.5 C,6,3a
+Weather,3,2100,2 C,6,3a
+Weather,3,2100,RCP 8.5,6,3a
+Weather,3,2300,1.5 C,6,3b
+Weather,3,2300,2 C,6,3b
+Weather,3,2300,RCP 8.5,6,3b
+Weather,4,Current,Current,6,4a
+Weather,1,Current,Current,7,1.0
+Weather,2,2100,1.5 C,7,2a
+Weather,2,2100,2 C,7,2a
+Weather,2,2100,RCP 8.5,7,2a
+Weather,2,2300,1.5 C,7,2b
+Weather,2,2300,2 C,7,2b
+Weather,2,2300,RCP 8.5,7,2b
+Weather,3,2100,1.5 C,7,3a
+Weather,3,2100,2 C,7,3a
+Weather,3,2100,RCP 8.5,7,3a
+Weather,3,2300,1.5 C,7,3b
+Weather,3,2300,2 C,7,3b
+Weather,3,2300,RCP 8.5,7,3b
+Weather,4,Current,Current,7,4a
+Weather,1,Current,Current,8,1.0
+Weather,2,2100,1.5 C,8,2a
+Weather,2,2100,2 C,8,2a
+Weather,2,2100,RCP 8.5,8,2a
+Weather,2,2300,1.5 C,8,2b
+Weather,2,2300,2 C,8,2b
+Weather,2,2300,RCP 8.5,8,2b
+Weather,3,2100,1.5 C,8,3a
+Weather,3,2100,2 C,8,3a
+Weather,3,2100,RCP 8.5,8,3a
+Weather,3,2300,1.5 C,8,3b
+Weather,3,2300,2 C,8,3b
+Weather,3,2300,RCP 8.5,8,3b
+Weather,4,Current,Current,8,4a
+Weather,1,Current,Current,9,1.0
+Weather,2,2100,1.5 C,9,2a
+Weather,2,2100,2 C,9,2a
+Weather,2,2100,RCP 8.5,9,2a
+Weather,2,2300,1.5 C,9,2b
+Weather,2,2300,2 C,9,2b
+Weather,2,2300,RCP 8.5,9,2b
+Weather,3,2100,1.5 C,9,3a
+Weather,3,2100,2 C,9,3a
+Weather,3,2100,RCP 8.5,9,3a
+Weather,3,2300,1.5 C,9,3b
+Weather,3,2300,2 C,9,3b
+Weather,3,2300,RCP 8.5,9,3b
+Weather,4,Current,Current,9,4a
+Weather,1,Current,Current,10,1.0
+Weather,2,2100,1.5 C,10,2a
+Weather,2,2100,2 C,10,2a
+Weather,2,2100,RCP 8.5,10,2a
+Weather,2,2300,1.5 C,10,2b
+Weather,2,2300,2 C,10,2b
+Weather,2,2300,RCP 8.5,10,2b
+Weather,3,2100,1.5 C,10,3a
+Weather,3,2100,2 C,10,3a
+Weather,3,2100,RCP 8.5,10,3a
+Weather,3,2300,1.5 C,10,3b
+Weather,3,2300,2 C,10,3b
+Weather,3,2300,RCP 8.5,10,3b
+Weather,4,Current,Current,10,4a
+Weather,1,Current,Current,11,1.0
+Weather,2,2100,1.5 C,11,2a
+Weather,2,2100,2 C,11,2a
+Weather,2,2100,RCP 8.5,11,2a
+Weather,2,2300,1.5 C,11,2b
+Weather,2,2300,2 C,11,2b
+Weather,2,2300,RCP 8.5,11,2b
+Weather,3,2100,1.5 C,11,3a
+Weather,3,2100,2 C,11,3a
+Weather,3,2100,RCP 8.5,11,3a
+Weather,3,2300,1.5 C,11,3b
+Weather,3,2300,2 C,11,3b
+Weather,3,2300,RCP 8.5,11,3b
+Weather,4,Current,Current,11,4a

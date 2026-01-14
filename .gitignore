@@ -1,5 +1,10 @@
 # Project specific
-/data
+/do_not_share
+/figures
+/tables
+/manuscript
+*.jpg
+*.png
 
 # History files
 .Rhistory
@@ -50,3 +55,5 @@ po/*~
 
 # RStudio Connect folder
 rsconnect/
+
+/.quarto/
