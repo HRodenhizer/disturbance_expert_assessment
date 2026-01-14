@@ -107,37 +107,10 @@ participant_frame = question_frame |>
 
 # Load Data
 
-## Participant Key
-
-```{r}
-key = read_excel('./do_not_share/Expert assessment_participant key.xlsx') |>
-  select(-2) |>
-  rename(Respondent = Number) |>
-  pivot_longer(
-    Anthropogenic:Weather,
-    names_to = 'Category',
-    values_to = 'Name'
-  ) |>
-  filter(!is.na(Name)) |>
-  mutate(
-    Category = factor(
-      Category,
-      levels = c(
-        'Anthropogenic',
-        'Biotic',
-        'Fire',
-        'Permafrost',
-        'Weather'
-      )
-    )
-  ) |>
-  arrange(Category, Name)
-```
-
 ## QA/QC Sheet
 
 ```{r}
-qa_qc = read_excel('do_not_share/QA_QC Notes.xlsx', sheet = 2) |>
+qa_qc = read_excel('data/QA_QC Notes.xlsx') |>
   mutate(
     Question = case_when(Question == '1' ~ '1.0', TRUE ~ Question),
     Category = factor(
@@ -172,13 +145,7 @@ qa_qc = read_excel('do_not_share/QA_QC Notes.xlsx', sheet = 2) |>
 ## Q1/3
 
 ```{r}
-q1_3 = read_excel(
-  './data/Q1_3.xlsx' #,
-  # range = 'A7:K402',
-  # col_names = colnames(
-  #   read_excel('./data/Q1_3.xlsx', n_max = 1)
-  #   )
-) |>
+q1_3 = read_excel('./data/Q1_3.xlsx') |>
   rename_with(~ str_to_title(.), .cols = Respondent:Flags) |>
   rename_with(
     ~ str_split(., ' ', simplify = TRUE)[, 3],
@@ -216,13 +183,7 @@ q1_3 = read_excel(
         TRUE ~ as.character(Timescale)
       ),
       levels = c('Current', '2100', '2300')
-    ) #,
-    # `Upper Range` = case_when(`Upper Range` > 2000 ~ NA,
-    #                   TRUE ~ `Upper Range`),
-    # `Even Chance` = case_when(`Even Chance` > 2000 ~ NA,
-    #                   TRUE ~ `Even Chance`),
-    # `Lower Range` = case_when(`Lower Range` > 2000 ~ NA,
-    #                   TRUE ~ `Lower Range`)
+    )
   ) |>
   rowwise() |>
   # rearrange values that are out of order
@@ -282,10 +243,7 @@ q1_3 = read_excel(
       filter(`Whole Question` %in% c(1, 3)),
     by = colnames(participant_frame)
   ) |>
-  inner_join(key, by = c('Category', 'Respondent')) |>
   arrange(Category, Respondent, `Whole Question`, Timescale, Scenario)
-
-nrow(q1_3) == nrow(key) * 7 # 1 row for q1, 3 for q3a, and 3 for q3b
 ```
 
 Add Filtering Column
@@ -398,8 +356,7 @@ Q1/3 Notes
 q1_3_notes = read_excel(
   './data/Q1_3.xlsx',
   sheet = 2
-) |>
-  inner_join(key, by = c('Category', 'Respondent'))
+)
 ```
 
 
@@ -453,10 +410,7 @@ q2 = read_excel('./data/Q2.xlsx') |>
       filter(`Whole Question` == 2),
     by = colnames(participant_frame)
   ) |>
-  inner_join(key, by = c('Category', 'Respondent')) |>
   arrange(Category, Respondent, `Whole Question`, Timescale, Scenario)
-
-nrow(q2) == nrow(key) * 6
 ```
 
 Add Filtering Column
@@ -571,8 +525,7 @@ q2_summary = q2 |>
 q2_notes = read_excel(
   './data/Q2.xlsx',
   sheet = 2
-) |>
-  inner_join(key, by = c('Category', 'Respondent'))
+)
 ```
 
 
@@ -612,7 +565,6 @@ q4 = read_excel(
       'Subquestion'
     )
   ) |>
-  inner_join(key, by = c('Category', 'Respondent')) |>
   arrange(Category, Respondent, `Whole Question`, Subquestion) |>
   mutate(
     Quadrant = case_when(
@@ -622,8 +574,6 @@ q4 = read_excel(
       Availability > 0 & Consensus > 0 ~ 'Well Established'
     )
   )
-
-nrow(q4) == nrow(key) * 4
 ```
 
 Add Filtering Column
