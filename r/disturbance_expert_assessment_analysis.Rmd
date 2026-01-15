@@ -534,11 +534,12 @@ q2_notes = read_excel(
 ```{r}
 q4 = read_excel(
   './data/Q4_figure.xlsx',
-  range = 'A7:G317',
+  range = 'A7:G313',
   col_names = colnames(
     read_excel('./data/Q4_figure.xlsx', range = 'A1:G1')
   )
 ) |>
+  filter(Respondent != 97) |>
   rename(Subquestion = `Sub-question (i-iv)`) |>
   mutate(
     Aspect = case_when(
@@ -2197,20 +2198,20 @@ ggplot(
   ) +
   scale_x_continuous(
     name = 'Availability of Evidence',
-    limits = c(-1, 1),
+    limits = c(-1 * 1.1, 1 * 1.1),
     breaks = c(-1, 1),
     labels = c('Low', 'High')
   ) +
   scale_y_continuous(
     name = 'Consensus of Evidence',
-    limits = c(-1, 1),
+    limits = c(-1 * 1.1, 1 * 1.1),
     breaks = c(-1, 1),
     labels = c('Low', 'High')
   ) +
   scale_color_viridis(discrete = TRUE, na.translate = FALSE) +
   scale_fill_viridis(discrete = TRUE, na.translate = FALSE, guide = "none") +
   facet_wrap(~Category, ncol = 5) +
-  coord_fixed() +
+  coord_fixed(expand = FALSE) +
   theme(
     legend.title = element_blank(),
     legend.position = "bottom",
@@ -2223,18 +2224,18 @@ ggplot(
     panel.grid = element_blank()
   )
 
-ggsave(
-  './figures/q4_compiled_one_row.pdf',
-  height = 65,
-  width = 180,
-  units = "mm"
-)
-ggsave(
-  './figures/q4_compiled_one_row.jpg',
-  height = 65,
-  width = 180,
-  units = "mm"
-)
+# ggsave(
+#   './figures/q4_compiled_one_row.pdf',
+#   height = 65,
+#   width = 180,
+#   units = "mm"
+# )
+# ggsave(
+#   './figures/q4_compiled_one_row.jpg',
+#   height = 65,
+#   width = 180,
+#   units = "mm"
+# )
 ```
 
 ```{r}
